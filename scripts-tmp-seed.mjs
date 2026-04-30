@@ -40,8 +40,10 @@ const patients = [
   { mrn:'MRN-009', full_name:'Lucas Almeida', cpf:'999.000.111-22', birth_date:'2002-08-07', blood_type:'NAO_TIPADO', blood_type_confirmed:false },
   { mrn:'MRN-010', full_name:'Patrícia Rocha', cpf:'000.111.222-33', birth_date:'1969-06-22', blood_type:'AB_NEG', blood_type_confirmed:true },
 ];
-const { data: pats } = await sb.from('patients').upsert(patients, { onConflict:'mrn' }).select();
-console.log('✓ patients', pats.length);
+const upRes = await sb.from('patients').upsert(patients, { onConflict:'mrn' }).select();
+if (upRes.error) console.log('patients err', upRes.error);
+const { data: pats } = await sb.from('patients').select('*').in('mrn', patients.map(p=>p.mrn));
+console.log('✓ patients', pats?.length);
 
 // Blood units
 const today = new Date();
