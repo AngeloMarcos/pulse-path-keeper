@@ -214,15 +214,15 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
       recipient_rh: rhReceptor,
       donor_abo: aboFromBloodType(selectedBag.blood_type),
       donor_rh: rhFromBloodType(selectedBag.blood_type),
-      pai_result: paiResult || null,
+      pai_result: (paiResult || null) as any,
       pai_antibody_identified: paiAntibody || null,
-      crossmatch_result: crossResult,
-      crossmatch_method: crossMethod,
+      crossmatch_result: crossResult as any,
+      crossmatch_method: crossMethod as any,
       crossmatch_notes: crossNotes || null,
       checklist: checklistJson,
       validated_by: user?.id,
       validated_at: new Date().toISOString(),
-    });
+    } as any);
     if (e1) { toast.error(e1.message); setValidating(false); return; }
     await supabase.from("transfusion_requests").update({ status: "pronto_dispensar" as any }).eq("id", req.id);
     await supabase.from("blood_units").update({ status: "reservado" as any }).eq("id", selectedBag.id);
