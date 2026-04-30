@@ -18,9 +18,12 @@ import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTransfusoesRouteImport } from './routes/_authenticated/transfusoes'
 import { Route as AuthenticatedTestesRouteImport } from './routes/_authenticated/testes'
 import { Route as AuthenticatedSolicitacoesRouteImport } from './routes/_authenticated/solicitacoes'
+import { Route as AuthenticatedReservaCirurgicaRouteImport } from './routes/_authenticated/reserva-cirurgica'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedReacoesRouteImport } from './routes/_authenticated/reacoes'
+import { Route as AuthenticatedRastreabilidadeRouteImport } from './routes/_authenticated/rastreabilidade'
 import { Route as AuthenticatedPacientesRouteImport } from './routes/_authenticated/pacientes'
+import { Route as AuthenticatedIntegracaoRouteImport } from './routes/_authenticated/integracao'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPacientesIdRouteImport } from './routes/_authenticated/pacientes.$id'
@@ -71,6 +74,12 @@ const AuthenticatedSolicitacoesRoute =
     path: '/solicitacoes',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReservaCirurgicaRoute =
+  AuthenticatedReservaCirurgicaRouteImport.update({
+    id: '/reserva-cirurgica',
+    path: '/reserva-cirurgica',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -81,9 +90,20 @@ const AuthenticatedReacoesRoute = AuthenticatedReacoesRouteImport.update({
   path: '/reacoes',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRastreabilidadeRoute =
+  AuthenticatedRastreabilidadeRouteImport.update({
+    id: '/rastreabilidade',
+    path: '/rastreabilidade',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPacientesRoute = AuthenticatedPacientesRouteImport.update({
   id: '/pacientes',
   path: '/pacientes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedIntegracaoRoute = AuthenticatedIntegracaoRouteImport.update({
+  id: '/integracao',
+  path: '/integracao',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedEstoqueRoute = AuthenticatedEstoqueRouteImport.update({
@@ -110,9 +130,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
+  '/integracao': typeof AuthenticatedIntegracaoRoute
   '/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/reacoes': typeof AuthenticatedReacoesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/reserva-cirurgica': typeof AuthenticatedReservaCirurgicaRoute
   '/solicitacoes': typeof AuthenticatedSolicitacoesRoute
   '/testes': typeof AuthenticatedTestesRoute
   '/transfusoes': typeof AuthenticatedTransfusoesRoute
@@ -126,9 +149,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
+  '/integracao': typeof AuthenticatedIntegracaoRoute
   '/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/reacoes': typeof AuthenticatedReacoesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/reserva-cirurgica': typeof AuthenticatedReservaCirurgicaRoute
   '/solicitacoes': typeof AuthenticatedSolicitacoesRoute
   '/testes': typeof AuthenticatedTestesRoute
   '/transfusoes': typeof AuthenticatedTransfusoesRoute
@@ -144,9 +170,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
+  '/_authenticated/integracao': typeof AuthenticatedIntegracaoRoute
   '/_authenticated/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/_authenticated/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/_authenticated/reacoes': typeof AuthenticatedReacoesRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/_authenticated/reserva-cirurgica': typeof AuthenticatedReservaCirurgicaRoute
   '/_authenticated/solicitacoes': typeof AuthenticatedSolicitacoesRoute
   '/_authenticated/testes': typeof AuthenticatedTestesRoute
   '/_authenticated/transfusoes': typeof AuthenticatedTransfusoesRoute
@@ -162,9 +191,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/estoque'
+    | '/integracao'
     | '/pacientes'
+    | '/rastreabilidade'
     | '/reacoes'
     | '/relatorios'
+    | '/reserva-cirurgica'
     | '/solicitacoes'
     | '/testes'
     | '/transfusoes'
@@ -178,9 +210,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/estoque'
+    | '/integracao'
     | '/pacientes'
+    | '/rastreabilidade'
     | '/reacoes'
     | '/relatorios'
+    | '/reserva-cirurgica'
     | '/solicitacoes'
     | '/testes'
     | '/transfusoes'
@@ -195,9 +230,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authenticated/dashboard'
     | '/_authenticated/estoque'
+    | '/_authenticated/integracao'
     | '/_authenticated/pacientes'
+    | '/_authenticated/rastreabilidade'
     | '/_authenticated/reacoes'
     | '/_authenticated/relatorios'
+    | '/_authenticated/reserva-cirurgica'
     | '/_authenticated/solicitacoes'
     | '/_authenticated/testes'
     | '/_authenticated/transfusoes'
@@ -278,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSolicitacoesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/reserva-cirurgica': {
+      id: '/_authenticated/reserva-cirurgica'
+      path: '/reserva-cirurgica'
+      fullPath: '/reserva-cirurgica'
+      preLoaderRoute: typeof AuthenticatedReservaCirurgicaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/relatorios': {
       id: '/_authenticated/relatorios'
       path: '/relatorios'
@@ -292,11 +337,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReacoesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/rastreabilidade': {
+      id: '/_authenticated/rastreabilidade'
+      path: '/rastreabilidade'
+      fullPath: '/rastreabilidade'
+      preLoaderRoute: typeof AuthenticatedRastreabilidadeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/pacientes': {
       id: '/_authenticated/pacientes'
       path: '/pacientes'
       fullPath: '/pacientes'
       preLoaderRoute: typeof AuthenticatedPacientesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/integracao': {
+      id: '/_authenticated/integracao'
+      path: '/integracao'
+      fullPath: '/integracao'
+      preLoaderRoute: typeof AuthenticatedIntegracaoRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/estoque': {
@@ -340,9 +399,12 @@ const AuthenticatedPacientesRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
+  AuthenticatedIntegracaoRoute: typeof AuthenticatedIntegracaoRoute
   AuthenticatedPacientesRoute: typeof AuthenticatedPacientesRouteWithChildren
+  AuthenticatedRastreabilidadeRoute: typeof AuthenticatedRastreabilidadeRoute
   AuthenticatedReacoesRoute: typeof AuthenticatedReacoesRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
+  AuthenticatedReservaCirurgicaRoute: typeof AuthenticatedReservaCirurgicaRoute
   AuthenticatedSolicitacoesRoute: typeof AuthenticatedSolicitacoesRoute
   AuthenticatedTestesRoute: typeof AuthenticatedTestesRoute
   AuthenticatedTransfusoesRoute: typeof AuthenticatedTransfusoesRoute
@@ -352,9 +414,12 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
+  AuthenticatedIntegracaoRoute: AuthenticatedIntegracaoRoute,
   AuthenticatedPacientesRoute: AuthenticatedPacientesRouteWithChildren,
+  AuthenticatedRastreabilidadeRoute: AuthenticatedRastreabilidadeRoute,
   AuthenticatedReacoesRoute: AuthenticatedReacoesRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
+  AuthenticatedReservaCirurgicaRoute: AuthenticatedReservaCirurgicaRoute,
   AuthenticatedSolicitacoesRoute: AuthenticatedSolicitacoesRoute,
   AuthenticatedTestesRoute: AuthenticatedTestesRoute,
   AuthenticatedTransfusoesRoute: AuthenticatedTransfusoesRoute,
