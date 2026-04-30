@@ -41,11 +41,11 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/15">
-            <Droplet className="h-6 w-6 text-destructive" />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/15">
+            <Droplet className="h-7 w-7 text-primary" fill="currentColor" />
           </div>
-          <CardTitle className="text-2xl">HemoVida</CardTitle>
-          <CardDescription>Sistema de gestão de hemoterapia</CardDescription>
+          <CardTitle className="text-2xl">SGAT</CardTitle>
+          <CardDescription>Sistema de Gestão de Agência Transfusional</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
@@ -62,8 +62,11 @@ function LoginPage() {
               Entrar
             </Button>
           </form>
-          <div className="mt-4 space-y-2 text-center text-sm">
+          <div className="mt-4 space-y-3 text-center text-sm">
             <Link to="/signup" className="text-primary hover:underline">Criar conta</Link>
+            <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2 text-left text-xs text-muted-foreground">
+              🔒 <strong className="text-foreground">Acesso restrito.</strong> Todas as ações são auditadas.
+            </div>
             <div className="rounded-md border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
               <strong className="text-foreground">Conta demo (gestor):</strong>
               <div>gestor@demo.com / Demo@2026!</div>
