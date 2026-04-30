@@ -144,13 +144,14 @@ function RequestForm({ onSaved }: { onSaved: () => void }) {
       urgency,
       clinical_indication: fd.get("clinical_indication"),
       diagnosis: fd.get("diagnosis"),
-      current_hemoglobin: fd.get("current_hemoglobin") ? Number(fd.get("current_hemoglobin")) : null,
-      current_hematocrit: fd.get("current_hematocrit") ? Number(fd.get("current_hematocrit")) : null,
-      emergency_justification: urgency === "emergencia" ? fd.get("emergency_justification") : null,
+      current_hb: fd.get("current_hb") ? Number(fd.get("current_hb")) : null,
+      current_ht: fd.get("current_ht") ? Number(fd.get("current_ht")) : null,
+      platelet_count: fd.get("platelet_count") ? Number(fd.get("platelet_count")) : null,
+      emergency_justification: (urgency === "emergencia" || urgency === "emergencia_absoluta") ? fd.get("emergency_justification") : null,
       status: "pendente",
     };
     if (!obj.clinical_indication || !obj.diagnosis) { toast.error("Indicação clínica e diagnóstico são obrigatórios"); return; }
-    if (urgency === "emergencia" && !obj.emergency_justification) { toast.error("Justifique a emergência"); return; }
+    if ((urgency === "emergencia" || urgency === "emergencia_absoluta") && !obj.emergency_justification) { toast.error("Justifique a emergência"); return; }
     setBusy(true);
     const { error } = await supabase.from("transfusion_requests").insert(obj);
     setBusy(false);
@@ -194,7 +195,7 @@ function RequestForm({ onSaved }: { onSaved: () => void }) {
           <SelectContent>{Object.entries(URGENCY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
         </Select>
       </div>
-      {urgency === "emergencia" && (
+      {(urgency === "emergencia" || urgency === "emergencia_absoluta") && (
         <div className="space-y-1">
           <Label className="req-asterisk text-destructive">Justificativa de emergência</Label>
           <Textarea name="emergency_justification" rows={2} required />
@@ -202,9 +203,10 @@ function RequestForm({ onSaved }: { onSaved: () => void }) {
       )}
       <div className="space-y-1"><Label className="req-asterisk">Indicação clínica</Label><Textarea name="clinical_indication" rows={2} required /></div>
       <div className="space-y-1"><Label className="req-asterisk">Diagnóstico</Label><Textarea name="diagnosis" rows={2} required /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1"><Label>Hb atual</Label><Input name="current_hemoglobin" type="number" step="0.1" /></div>
-        <div className="space-y-1"><Label>Ht atual</Label><Input name="current_hematocrit" type="number" step="0.1" /></div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-1"><Label>Hb (g/dL)</Label><Input name="current_hb" type="number" step="0.1" /></div>
+        <div className="space-y-1"><Label>Ht (%)</Label><Input name="current_ht" type="number" step="0.1" /></div>
+        <div className="space-y-1"><Label>Plaquetas</Label><Input name="platelet_count" type="number" /></div>
       </div>
       <Button type="submit" className="w-full" disabled={busy}>Salvar</Button>
     </form>

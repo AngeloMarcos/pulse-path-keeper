@@ -12,11 +12,12 @@ import { ExpiringBanner } from "@/components/expiring-banner";
 import { SevereReactionBanner } from "@/components/severe-reaction-banner";
 import {
   LayoutDashboard, Users, ClipboardList, FlaskConical, Droplet, Activity,
-  AlertTriangle, BarChart3, LogOut, Settings, Loader2,
+  AlertTriangle, BarChart3, LogOut, Settings, Loader2, CalendarClock, Cable, Search,
 } from "lucide-react";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, ClipboardList, FlaskConical, Droplet, Activity, AlertTriangle, BarChart3,
+  CalendarClock, Cable, Search,
 };
 
 export const Route = createFileRoute("/_authenticated")({ component: AuthLayout });
@@ -71,7 +72,10 @@ function AppSidebar() {
           <div className="h-8 w-8 rounded-md bg-destructive/15 flex items-center justify-center">
             <Droplet className="h-4 w-4 text-destructive" />
           </div>
-          <div className="font-semibold text-sm">HemoVida</div>
+          <div>
+            <div className="font-semibold text-sm leading-tight">SGAT</div>
+            <div className="text-[10px] text-muted-foreground leading-tight">Agência Transfusional</div>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>

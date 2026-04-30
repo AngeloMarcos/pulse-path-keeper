@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BLOOD_TYPES, BLOOD_TYPE_LABELS, COMPONENT_MAIN, COMPONENT_LABELS, REQUEST_STATUS_LABELS,
+  urgencyBadgeClass, URGENCY_LABELS,
 } from "@/lib/domain";
-import { Droplet, ClipboardList, PackageCheck, Activity } from "lucide-react";
+import { Droplet, ClipboardList, PackageCheck, Activity, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({ component: Dashboard });
 
@@ -16,14 +17,18 @@ function Dashboard() {
     queryFn: async () => {
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const todayIso = today.toISOString();
-      const [units, pending, ready, transf, allReqs] = await Promise.all([
+      const expLimit = new Date(Date.now() + 48 * 36e5).toISOString().slice(0, 10);
+      const [units, pending, ready, transf, allReqs, expiring, urgent] = await Promise.all([
         supabase.from("blood_units").select("component_type,blood_type,id").eq("status", "disponivel"),
         supabase.from("transfusion_requests").select("id", { count: "exact", head: true }).eq("status", "pendente"),
         supabase.from("transfusion_requests").select("id", { count: "exact", head: true }).eq("status", "pronto_dispensar"),
         supabase.from("transfusions").select("id", { count: "exact", head: true }).gte("started_at", todayIso),
         supabase.from("transfusion_requests").select("status"),
+        supabase.from("blood_units").select("id", { count: "exact", head: true }).eq("status", "disponivel").lte("expiration_date", expLimit),
+        supabase.from("transfusion_requests").select("id, urgency, created_at, patients(full_name, mrn), component_type, quantity")
+          .in("urgency", ["urgencia","emergencia","emergencia_absoluta"])
+          .order("created_at", { ascending: false }).limit(5),
       ]);
-      // Build matrix
       const matrix: Record<string, Record<string, number>> = {};
       for (const c of COMPONENT_MAIN) {
         matrix[c] = {};
@@ -40,24 +45,27 @@ function Dashboard() {
         pending: pending.count ?? 0,
         ready: ready.count ?? 0,
         transfToday: transf.count ?? 0,
+        expiring: expiring.count ?? 0,
         matrix, statusCounts,
+        urgent: urgent.data ?? [],
       };
     },
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
   });
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Visão geral do banco de sangue</p>
+        <p className="text-sm text-muted-foreground">Visão geral da agência transfusional</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI title="Total em Estoque" value={data?.totalAvail} icon={Droplet} color="text-primary" loading={isLoading} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <KPI title="Bolsas Disponíveis" value={data?.totalAvail} icon={Droplet} color="text-primary" loading={isLoading} />
         <KPI title="Solicitações Pendentes" value={data?.pending} icon={ClipboardList} color="text-warning" loading={isLoading} />
-        <KPI title="Pronto para Dispensar" value={data?.ready} icon={PackageCheck} color="text-success" loading={isLoading} />
+        <KPI title="Pronto p/ Dispensar" value={data?.ready} icon={PackageCheck} color="text-success" loading={isLoading} />
         <KPI title="Transfusões Hoje" value={data?.transfToday} icon={Activity} color="text-destructive" loading={isLoading} />
+        <KPI title="Vencendo em 48h" value={data?.expiring} icon={AlertTriangle} color="text-warning" loading={isLoading} alert={(data?.expiring ?? 0) > 0} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -111,13 +119,34 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle>Solicitações urgentes / emergência</CardTitle></CardHeader>
+        <CardContent>
+          {isLoading ? <Skeleton className="h-24 w-full" /> : data?.urgent.length === 0 ? (
+            <div className="text-sm text-muted-foreground">Nenhuma solicitação urgente no momento.</div>
+          ) : (
+            <div className="space-y-2">
+              {data?.urgent.map((r: any) => (
+                <Link key={r.id} to="/solicitacoes" className="flex items-center justify-between gap-2 p-2 rounded hover:bg-muted/40 text-sm">
+                  <div>
+                    <div className="font-medium">{r.patients?.full_name} <span className="text-xs text-muted-foreground">{r.patients?.mrn}</span></div>
+                    <div className="text-xs text-muted-foreground">{r.component_type} × {r.quantity} • {new Date(r.created_at).toLocaleString("pt-BR")}</div>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-xs ${urgencyBadgeClass(r.urgency)}`}>{URGENCY_LABELS[r.urgency]}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-function KPI({ title, value, icon: Icon, color, loading }: { title: string; value?: number; icon: any; color: string; loading: boolean }) {
+function KPI({ title, value, icon: Icon, color, loading, alert }: { title: string; value?: number; icon: any; color: string; loading: boolean; alert?: boolean }) {
   return (
-    <Card>
+    <Card className={alert ? "border-warning/60 bg-warning/5" : ""}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div>
