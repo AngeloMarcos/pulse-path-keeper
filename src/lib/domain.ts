@@ -32,14 +32,17 @@ export const URGENCY_LABELS: Record<string, string> = {
   rotina: "Rotina",
   urgencia: "Urgência",
   emergencia: "Emergência",
+  emergencia_absoluta: "Emergência absoluta",
 };
 export const REQUEST_STATUS_LABELS: Record<string, string> = {
   pendente: "Pendente",
   em_analise: "Em análise",
   aguardando_amostra: "Aguardando amostra",
+  testes_em_andamento: "Testes em andamento",
   pronto_dispensar: "Pronto p/ dispensar",
   dispensado: "Dispensado",
-  transfundido: "Transfundido",
+  transfundindo: "Transfundindo",
+  concluido: "Concluído",
   cancelado: "Cancelado",
 };
 export const UNIT_STATUS_LABELS: Record<string, string> = {
@@ -52,14 +55,15 @@ export const UNIT_STATUS_LABELS: Record<string, string> = {
 };
 
 export const REACTION_TYPE_LABELS: Record<string, string> = {
-  hemolitica_aguda: "Hemolítica aguda",
-  hemolitica_tardia: "Hemolítica tardia",
-  febril_nao_hemolitica: "Febril não hemolítica",
+  rfnh: "RFNH (febril não hemolítica)",
   alergica_leve: "Alérgica leve",
   alergica_grave: "Alérgica grave",
+  hemolitica_aguda: "Hemolítica aguda",
+  hemolitica_tardia: "Hemolítica tardia",
   trali: "TRALI",
   taco: "TACO",
-  septica: "Séptica",
+  bacteriana: "Contaminação bacteriana",
+  hipotensao: "Hipotensão",
   outra: "Outra",
 };
 export const SEVERITY_LABELS: Record<string, string> = {
@@ -80,16 +84,19 @@ export const SIDEBAR_ITEMS: SidebarItemConfig[] = [
   { to: "/dashboard", label: "Dashboard", icon: "LayoutDashboard", roles: "all" },
   { to: "/pacientes", label: "Pacientes", icon: "Users", roles: ["hemoterapeuta","biomedico","tecnico","medico","gestor"] },
   { to: "/solicitacoes", label: "Solicitações", icon: "ClipboardList", roles: "all" },
+  { to: "/reserva-cirurgica", label: "Reserva Cirúrgica", icon: "CalendarClock", roles: ["hemoterapeuta","biomedico","tecnico","medico","gestor"] },
   { to: "/testes", label: "Testes Pré-Transfusionais", icon: "FlaskConical", roles: ["hemoterapeuta","biomedico","tecnico"] },
+  { to: "/transfusoes", label: "Acompanhamento de Transfusão", icon: "Activity", roles: "all" },
+  { to: "/reacoes", label: "Reações Adversas / FIT", icon: "AlertTriangle", roles: ["hemoterapeuta","biomedico","enfermeiro","medico","gestor"] },
   { to: "/estoque", label: "Estoque de Bolsas", icon: "Droplet", roles: ["hemoterapeuta","biomedico","tecnico","gestor"] },
-  { to: "/transfusoes", label: "Transfusões", icon: "Activity", roles: ["hemoterapeuta","biomedico","enfermeiro","tecnico","gestor"] },
-  { to: "/reacoes", label: "Reações Adversas", icon: "AlertTriangle", roles: ["hemoterapeuta","biomedico","enfermeiro","medico","gestor"] },
+  { to: "/integracao", label: "Integração HIS/LIS", icon: "Cable", roles: ["hemoterapeuta","gestor"] },
+  { to: "/rastreabilidade", label: "Rastreabilidade", icon: "Search", roles: ["hemoterapeuta","biomedico","gestor"] },
   { to: "/relatorios", label: "Relatórios", icon: "BarChart3", roles: ["hemoterapeuta","gestor"] },
 ];
 
 export function bloodTypeBadgeClass(bt: string): string {
   if (bt.endsWith("NEG")) return "bg-destructive/15 text-destructive border border-destructive/30";
-  if (bt.endsWith("POS")) return "bg-primary/15 text-primary border border-primary/30";
+  if (bt.endsWith("POS")) return "bg-primary/20 text-primary-foreground border border-primary/40";
   return "bg-muted text-muted-foreground border border-border";
 }
 
@@ -103,7 +110,8 @@ export function expirationClass(date: string): string {
 }
 
 export function urgencyBadgeClass(u: string): string {
-  if (u === "emergencia") return "bg-destructive text-destructive-foreground pulse-emergency";
+  if (u === "emergencia_absoluta") return "bg-destructive text-destructive-foreground pulse-emergency";
+  if (u === "emergencia") return "bg-destructive/80 text-destructive-foreground";
   if (u === "urgencia") return "bg-warning text-warning-foreground";
   return "bg-muted text-muted-foreground";
 }
@@ -111,10 +119,13 @@ export function urgencyBadgeClass(u: string): string {
 export function statusBadgeClass(s: string): string {
   switch (s) {
     case "pendente": return "bg-muted text-muted-foreground";
-    case "em_analise": return "bg-primary/20 text-primary";
+    case "em_analise": return "bg-primary/20 text-primary-foreground";
     case "aguardando_amostra": return "bg-warning/20 text-warning";
+    case "testes_em_andamento": return "bg-warning/20 text-warning";
     case "pronto_dispensar": return "bg-success/20 text-success";
-    case "dispensado": return "bg-primary/20 text-primary";
+    case "dispensado": return "bg-primary/20 text-primary-foreground";
+    case "transfundindo": return "bg-primary/30 text-primary-foreground";
+    case "concluido": return "bg-success/30 text-success";
     case "transfundido": return "bg-success/30 text-success";
     case "cancelado": return "bg-destructive/20 text-destructive";
     case "disponivel": return "bg-success/20 text-success";
