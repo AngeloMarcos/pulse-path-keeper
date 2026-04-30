@@ -195,7 +195,7 @@ function RequestForm({ onSaved }: { onSaved: () => void }) {
           <SelectContent>{Object.entries(URGENCY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
         </Select>
       </div>
-      {urgency === "emergencia" && (
+      {(urgency === "emergencia" || urgency === "emergencia_absoluta") && (
         <div className="space-y-1">
           <Label className="req-asterisk text-destructive">Justificativa de emergência</Label>
           <Textarea name="emergency_justification" rows={2} required />
@@ -203,9 +203,10 @@ function RequestForm({ onSaved }: { onSaved: () => void }) {
       )}
       <div className="space-y-1"><Label className="req-asterisk">Indicação clínica</Label><Textarea name="clinical_indication" rows={2} required /></div>
       <div className="space-y-1"><Label className="req-asterisk">Diagnóstico</Label><Textarea name="diagnosis" rows={2} required /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1"><Label>Hb atual</Label><Input name="current_hemoglobin" type="number" step="0.1" /></div>
-        <div className="space-y-1"><Label>Ht atual</Label><Input name="current_hematocrit" type="number" step="0.1" /></div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-1"><Label>Hb (g/dL)</Label><Input name="current_hb" type="number" step="0.1" /></div>
+        <div className="space-y-1"><Label>Ht (%)</Label><Input name="current_ht" type="number" step="0.1" /></div>
+        <div className="space-y-1"><Label>Plaquetas</Label><Input name="platelet_count" type="number" /></div>
       </div>
       <Button type="submit" className="w-full" disabled={busy}>Salvar</Button>
     </form>
