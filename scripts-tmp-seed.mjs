@@ -74,12 +74,12 @@ console.log('✓ units', units.length, ue?.message ?? '');
 
 // Requests
 const reqs = [
-  { patient_id: pats[0].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:2, urgency:'rotina', clinical_indication:'Anemia pré-operatória', diagnosis:'Cirurgia eletiva de quadril', current_hemoglobin:7.8, current_hematocrit:24.0, status:'pendente' },
-  { patient_id: pats[1].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:1, urgency:'urgencia', clinical_indication:'Hemorragia digestiva', diagnosis:'Úlcera péptica sangrando', current_hemoglobin:6.2, current_hematocrit:19.0, status:'em_analise' },
-  { patient_id: pats[2].id, requesting_physician_id: ids.medico, component_type:'CP', quantity:1, urgency:'rotina', clinical_indication:'Plaquetopenia pós-quimioterapia', diagnosis:'LMA em quimio', status:'pendente' },
-  { patient_id: pats[3].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:2, urgency:'emergencia', clinical_indication:'Politrauma', diagnosis:'Acidente automobilístico', current_hemoglobin:5.1, status:'em_analise', emergency_justification:'Choque hemorrágico classe IV' },
+  { patient_id: pats[0].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:2, urgency:'rotina', clinical_indication:'Anemia pré-operatória', diagnosis:'Cirurgia eletiva de quadril', current_hb:7.8, current_ht:24.0, status:'pendente' },
+  { patient_id: pats[1].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:1, urgency:'urgencia', clinical_indication:'Hemorragia digestiva', diagnosis:'Úlcera péptica sangrando', current_hb:6.2, current_ht:19.0, status:'em_analise' },
+  { patient_id: pats[2].id, requesting_physician_id: ids.medico, component_type:'CP', quantity:1, urgency:'rotina', clinical_indication:'Plaquetopenia pós-quimioterapia', diagnosis:'LMA em quimio', platelet_count:18000, status:'pendente' },
+  { patient_id: pats[3].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:2, urgency:'emergencia_absoluta', clinical_indication:'Politrauma', diagnosis:'Acidente automobilístico', current_hb:5.1, status:'em_analise', emergency_justification:'Choque hemorrágico classe IV' },
   { patient_id: pats[4].id, requesting_physician_id: ids.medico, component_type:'PFC', quantity:2, urgency:'rotina', clinical_indication:'Coagulopatia hepática', diagnosis:'Cirrose Child C', status:'pronto_dispensar' },
-  { patient_id: pats[5].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:1, urgency:'rotina', clinical_indication:'Anemia falciforme em crise', diagnosis:'Anemia falciforme', status:'aguardando_amostra' },
+  { patient_id: pats[5].id, requesting_physician_id: ids.medico, component_type:'CH', quantity:1, urgency:'urgencia', clinical_indication:'Anemia falciforme em crise', diagnosis:'Anemia falciforme', status:'aguardando_amostra' },
 ];
 const { data: insertedReqs } = await sb.from('transfusion_requests').insert(reqs).select();
 console.log('✓ requests', insertedReqs?.length);
