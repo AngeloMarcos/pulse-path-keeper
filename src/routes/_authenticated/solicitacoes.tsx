@@ -433,7 +433,7 @@ function RequestDetail({ id, onClose, onChanged }: { id: string | null; onClose:
       const { data } = await supabase.from("transfusion_requests")
         .select("*, patients(full_name, mrn, blood_type), profiles:requesting_physician_id(full_name, registro_profissional)")
         .eq("id", id!).single();
-      return data;
+      return data as any;
     },
   });
   const update = async (status: string) => {
