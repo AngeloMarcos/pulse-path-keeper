@@ -17,72 +17,105 @@ export type Database = {
       adverse_reactions: {
         Row: {
           actions_taken: Json | null
+          attending_physician: string | null
           blood_unit_id: string | null
+          clinical_evolution: string | null
           closed_at: string | null
           closed_by: string | null
           created_at: string
+          final_classification:
+            | Database["public"]["Enums"]["reaction_type"]
+            | null
           hemoterapeuta_conclusion: string | null
+          hemoterapeuta_crm: string | null
           hemoterapeuta_name: string | null
           hemoterapeuta_notified_at: string | null
           id: string
           lab_results: Json | null
           notification_datetime: string
+          notifying_nurse: string | null
           notifying_unit: string | null
           notivisa_protocol: string | null
           notivisa_sent: boolean
           outcome: string | null
           patient_id: string
+          reaction_started_at: string | null
           reaction_type: Database["public"]["Enums"]["reaction_type"]
+          recommendations: string | null
           reported_by: string | null
           severity: Database["public"]["Enums"]["reaction_severity"]
+          status: string
           symptoms: Json | null
           transfusion_id: string | null
+          volume_until_reaction_ml: number | null
         }
         Insert: {
           actions_taken?: Json | null
+          attending_physician?: string | null
           blood_unit_id?: string | null
+          clinical_evolution?: string | null
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
+          final_classification?:
+            | Database["public"]["Enums"]["reaction_type"]
+            | null
           hemoterapeuta_conclusion?: string | null
+          hemoterapeuta_crm?: string | null
           hemoterapeuta_name?: string | null
           hemoterapeuta_notified_at?: string | null
           id?: string
           lab_results?: Json | null
           notification_datetime?: string
+          notifying_nurse?: string | null
           notifying_unit?: string | null
           notivisa_protocol?: string | null
           notivisa_sent?: boolean
           outcome?: string | null
           patient_id: string
+          reaction_started_at?: string | null
           reaction_type: Database["public"]["Enums"]["reaction_type"]
+          recommendations?: string | null
           reported_by?: string | null
           severity: Database["public"]["Enums"]["reaction_severity"]
+          status?: string
           symptoms?: Json | null
           transfusion_id?: string | null
+          volume_until_reaction_ml?: number | null
         }
         Update: {
           actions_taken?: Json | null
+          attending_physician?: string | null
           blood_unit_id?: string | null
+          clinical_evolution?: string | null
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
+          final_classification?:
+            | Database["public"]["Enums"]["reaction_type"]
+            | null
           hemoterapeuta_conclusion?: string | null
+          hemoterapeuta_crm?: string | null
           hemoterapeuta_name?: string | null
           hemoterapeuta_notified_at?: string | null
           id?: string
           lab_results?: Json | null
           notification_datetime?: string
+          notifying_nurse?: string | null
           notifying_unit?: string | null
           notivisa_protocol?: string | null
           notivisa_sent?: boolean
           outcome?: string | null
           patient_id?: string
+          reaction_started_at?: string | null
           reaction_type?: Database["public"]["Enums"]["reaction_type"]
+          recommendations?: string | null
           reported_by?: string | null
           severity?: Database["public"]["Enums"]["reaction_severity"]
+          status?: string
           symptoms?: Json | null
           transfusion_id?: string | null
+          volume_until_reaction_ml?: number | null
         }
         Relationships: []
       }
@@ -251,6 +284,42 @@ export type Database = {
           payload?: Json | null
           response?: Json | null
           status?: Database["public"]["Enums"]["integration_status"]
+        }
+        Relationships: []
+      }
+      integration_settings: {
+        Row: {
+          auth_token: string | null
+          endpoint_url: string | null
+          features: Json
+          field_mapping: Json
+          id: string
+          kind: string
+          system_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auth_token?: string | null
+          endpoint_url?: string | null
+          features?: Json
+          field_mapping?: Json
+          id?: string
+          kind: string
+          system_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auth_token?: string | null
+          endpoint_url?: string | null
+          features?: Json
+          field_mapping?: Json
+          id?: string
+          kind?: string
+          system_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -699,6 +768,8 @@ export type Database = {
         | "bacteriana"
         | "hipotensao"
         | "outra"
+        | "anafilaxia"
+        | "hipotensao_bradicinina"
       request_status:
         | "pendente"
         | "em_analise"
@@ -897,6 +968,8 @@ export const Constants = {
         "bacteriana",
         "hipotensao",
         "outra",
+        "anafilaxia",
+        "hipotensao_bradicinina",
       ],
       request_status: [
         "pendente",
