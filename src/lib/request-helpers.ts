@@ -73,3 +73,98 @@ export function printRequestPDF(req: {
   w.document.write(html);
   w.document.close();
 }
+
+export type VitalRow = {
+  label: string;
+  datetime?: string | null;
+  pas?: number | null;
+  pad?: number | null;
+  fc?: number | null;
+  temp?: number | null;
+  spo2?: number | null;
+  obs?: string | null;
+};
+
+export function printTransfusionForm(t: {
+  patient_name: string; mrn: string; bed?: string;
+  patient_blood_type: string; bag_number: string; bag_blood_type: string;
+  component_type: string; volume_total: number;
+  started_at: string; finished_at?: string | null;
+  technician_at?: string; nurse?: string; ward?: string;
+  access_route?: string; flow_rate?: string;
+  vitals: VitalRow[];
+  intercurrence?: boolean; intercurrence_desc?: string;
+  intercurrence_time?: string; intercurrence_action?: string;
+  suspended?: boolean; volume_transfused?: number | null; bag_destination?: string;
+  volume_transfused_ml?: number | null;
+  checklist?: Record<string, boolean>;
+}) {
+  const w = window.open("", "_blank", "width=820,height=1100");
+  if (!w) return;
+  const vrow = (v: VitalRow) => `<tr>
+    <td class="label">${v.label}</td>
+    <td>${v.datetime ? new Date(v.datetime).toLocaleString("pt-BR") : "—"}</td>
+    <td>${v.pas ?? "—"}/${v.pad ?? "—"}</td>
+    <td>${v.fc ?? "—"}</td><td>${v.temp ?? "—"}</td>
+    <td>${v.spo2 ?? "—"}</td><td>${v.obs ?? "—"}</td>
+  </tr>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>POP-GSAT-05 Acompanhamento de Transfusão</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    body { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color:#000; }
+    h1 { font-size: 15px; text-align:center; margin: 0; }
+    h2 { font-size: 12px; background:#1F3864; color:#fff; padding:4px 8px; margin: 10px 0 4px; }
+    .header { text-align:center; border-bottom: 2px solid #1F3864; padding-bottom: 6px; margin-bottom: 8px; }
+    table { width:100%; border-collapse: collapse; margin: 3px 0; }
+    td, th { padding: 3px 5px; border: 1px solid #999; vertical-align: top; font-size:10px; }
+    .label { background:#f0f0f0; font-weight:600; }
+    .sig { margin-top: 30px; display:flex; justify-content: space-between; }
+    .sig div { width:45%; border-top:1px solid #000; padding-top:4px; text-align:center; font-size:10px; }
+  </style></head><body>
+  <div class="header">
+    <h1>POP-GSAT-05 — Formulário de Acompanhamento de Transfusão</h1>
+    <div style="font-size:10px;">Hospital — Agência Transfusional · SGAT</div>
+  </div>
+  <h2>1. Identificação</h2>
+  <table>
+    <tr><td class="label">Paciente</td><td>${t.patient_name}</td><td class="label">Prontuário</td><td>${t.mrn}</td></tr>
+    <tr><td class="label">Leito/Setor</td><td>${t.bed ?? t.ward ?? "—"}</td><td class="label">Tipo paciente</td><td>${t.patient_blood_type}</td></tr>
+    <tr><td class="label">Código bolsa</td><td>${t.bag_number}</td><td class="label">Tipo bolsa</td><td>${t.bag_blood_type}</td></tr>
+    <tr><td class="label">Hemocomponente</td><td>${t.component_type}</td><td class="label">Volume total</td><td>${t.volume_total} ml</td></tr>
+    <tr><td class="label">Técnico AT</td><td>${t.technician_at ?? "—"}</td><td class="label">Enfermeiro(a)</td><td>${t.nurse ?? "—"}</td></tr>
+    <tr><td class="label">Via de acesso</td><td>${t.access_route ?? "—"}</td><td class="label">Fluxo</td><td>${t.flow_rate ?? "—"}</td></tr>
+  </table>
+  <h2>2. Sinais Vitais</h2>
+  <table>
+    <thead><tr><th>Momento</th><th>Data/hora</th><th>PA (mmHg)</th><th>FC</th><th>Temp</th><th>SpO₂</th><th>Obs</th></tr></thead>
+    <tbody>${t.vitals.map(vrow).join("")}</tbody>
+  </table>
+  <h2>3. Intercorrências</h2>
+  <table>
+    <tr><td class="label">Ocorreu intercorrência?</td><td>${t.intercurrence ? "SIM" : "NÃO"}</td></tr>
+    ${t.intercurrence ? `
+    <tr><td class="label">Descrição</td><td>${t.intercurrence_desc ?? "—"}</td></tr>
+    <tr><td class="label">Horário</td><td>${t.intercurrence_time ?? "—"}</td></tr>
+    <tr><td class="label">Conduta</td><td>${t.intercurrence_action ?? "—"}</td></tr>
+    <tr><td class="label">Suspensa?</td><td>${t.suspended ? "SIM" : "NÃO"}</td></tr>
+    ${t.suspended ? `
+    <tr><td class="label">Volume até suspensão</td><td>${t.volume_transfused ?? "—"} ml</td></tr>
+    <tr><td class="label">Destino da bolsa</td><td>${t.bag_destination ?? "—"}</td></tr>` : ""}
+    ` : ""}
+  </table>
+  <h2>4. Finalização</h2>
+  <table>
+    <tr><td class="label">Início</td><td>${new Date(t.started_at).toLocaleString("pt-BR")}</td>
+        <td class="label">Término</td><td>${t.finished_at ? new Date(t.finished_at).toLocaleString("pt-BR") : "—"}</td></tr>
+    <tr><td class="label">Volume total transfundido</td><td colspan="3">${t.volume_transfused_ml ?? "—"} ml</td></tr>
+  </table>
+  ${t.checklist ? `<table><tbody>${Object.entries(t.checklist).map(([k,v])=>`<tr><td>${v?"☑":"☐"} ${k}</td></tr>`).join("")}</tbody></table>` : ""}
+  <div class="sig">
+    <div>${t.technician_at ?? ""}<br/><small>Técnico AT — entrega</small></div>
+    <div>${t.nurse ?? ""}<br/><small>Enfermeiro(a) — recebimento</small></div>
+  </div>
+  <script>window.onload = () => { window.print(); };</script>
+  </body></html>`;
+  w.document.write(html);
+  w.document.close();
+}
