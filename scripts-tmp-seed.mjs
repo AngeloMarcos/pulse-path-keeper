@@ -40,7 +40,10 @@ const patients = [
   { mrn:'MRN-009', full_name:'Lucas Almeida', cpf:'999.000.111-22', birth_date:'2002-08-07', blood_type:'NAO_TIPADO', blood_type_confirmed:false },
   { mrn:'MRN-010', full_name:'Patrícia Rocha', cpf:'000.111.222-33', birth_date:'1969-06-22', blood_type:'AB_NEG', blood_type_confirmed:true },
 ];
-const upRes = await sb.from('patients').upsert(patients, { onConflict:'mrn' }).select();
+const patientsFull = patients.map(p => ({
+  irradiation_required: false, cmv_negative_required: false, blood_type_confirmed: false, ...p
+}));
+const upRes = await sb.from('patients').upsert(patientsFull, { onConflict:'mrn' }).select();
 if (upRes.error) console.log('patients err', upRes.error);
 const { data: pats } = await sb.from('patients').select('*').in('mrn', patients.map(p=>p.mrn));
 console.log('✓ patients', pats?.length);
