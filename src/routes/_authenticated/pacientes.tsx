@@ -120,7 +120,7 @@ function PatientForm({ onSaved }: { onSaved: () => void }) {
     const parsed = schema.safeParse(obj);
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setBusy(true);
-    const { error } = await supabase.from("patients").insert(parsed.data);
+    const { error } = await supabase.from("patients").insert(parsed.data as any);
     setBusy(false);
     if (error) { toast.error("Erro ao salvar", { description: error.message }); return; }
     toast.success("Paciente cadastrado");
