@@ -490,5 +490,3 @@ function LookBack() {
     </div>
   );
 }
-// Suppress unused-import warning for ClipboardCheck
-void ClipboardCheck;
