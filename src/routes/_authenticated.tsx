@@ -56,6 +56,7 @@ function AuthLayout() {
               <span className="text-sm font-medium truncate max-w-[200px]">{profile?.full_name}</span>
               <span className="text-[11px] text-muted-foreground truncate max-w-[200px]">{roleLabel}</span>
             </div>
+            <ThemeToggle />
             <NotificationBell />
           </header>
           <SevereReactionBanner />
