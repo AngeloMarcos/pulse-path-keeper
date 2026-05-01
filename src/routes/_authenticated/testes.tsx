@@ -125,6 +125,9 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   const [crossMethod, setCrossMethod] = useState<string>("gel");
   const [crossNotes, setCrossNotes] = useState("");
   const [showIncompatModal, setShowIncompatModal] = useState(false);
+  const [overrideJustification, setOverrideJustification] = useState("");
+  // Tipagem divergente
+  const [typingJustification, setTypingJustification] = useState("");
   // Checklist
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     tipagem: false, pai: false, prova: false, validade: false, integridade: false, rotulo: false,
