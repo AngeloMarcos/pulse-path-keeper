@@ -149,7 +149,7 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   useEffect(() => {
     if (!id) return;
     setTab("tipagem"); setSelectedBag(null); setBagConfirmInput(""); setBagConfirmed(false);
-    setCrossResult(""); setCrossNotes("");
+    setCrossResult(""); setCrossNotes(""); setOverrideJustification(""); setTypingJustification("");
     setChecklist({ tipagem: false, pai: false, prova: false, validade: false, integridade: false, rotulo: false });
     if (req?.patients) {
       setAboReceptor(aboFromBloodType(req.patients.blood_type));
