@@ -63,7 +63,11 @@ function LoginPage() {
             </Button>
           </form>
           <div className="mt-4 space-y-3 text-center text-sm">
-            <Link to="/signup" className="text-primary hover:underline">Criar conta</Link>
+            <div className="flex items-center justify-center gap-3">
+              <Link to="/signup" className="text-primary hover:underline">Criar conta</Link>
+              <span className="text-muted-foreground">·</span>
+              <Link to="/esqueci-senha" className="text-primary hover:underline">Esqueci minha senha</Link>
+            </div>
             <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2 text-left text-xs text-muted-foreground">
               🔒 <strong className="text-foreground">Acesso restrito.</strong> Todas as ações são auditadas.
             </div>
