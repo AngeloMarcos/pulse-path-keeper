@@ -179,7 +179,16 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
 
   const cadastroBT = req?.patients?.blood_type ?? "";
   const digitadoBT = aboReceptor && rhReceptor ? `${aboReceptor}_${rhReceptor === "+" ? "POS" : "NEG"}` : "";
-  const typingDiscrepancy = cadastroBT && cadastroBT !== "NAO_TIPADO" && digitadoBT && digitadoBT !== cadastroBT;
+  // Tipagem confirmada no histórico e diverge do digitado: alerta amarelo + justificativa obrigatória (não bloqueia)
+  const typingDiscrepancyConfirmed =
+    !!req?.patients?.blood_type_confirmed &&
+    cadastroBT && cadastroBT !== "NAO_TIPADO" &&
+    !!digitadoBT && digitadoBT !== cadastroBT;
+  // Diferente sem confirmação: divergência genérica (alerta vermelho original)
+  const typingDiscrepancy =
+    !req?.patients?.blood_type_confirmed &&
+    cadastroBT && cadastroBT !== "NAO_TIPADO" &&
+    !!digitadoBT && digitadoBT !== cadastroBT;
 
   const irradiationMismatch = selectedBag && req?.patients?.irradiation_required && !selectedBag.irradiated;
   const cmvMismatch = selectedBag && req?.patients?.cmv_negative_required && !selectedBag.cmv_negative;
@@ -196,9 +205,16 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   };
 
   const paiBlocked = paiResult === "positivo" && !paiAntibody.trim();
+  const typingJustifMissing = typingDiscrepancyConfirmed && typingJustification.trim().length < 10;
   const allChecked = Object.values(checklist).every(Boolean);
-  const canRelease = canValidate && bagConfirmed && crossResult === "compativel" && !typingDiscrepancy && !paiBlocked && !irradiationMismatch && allChecked;
   const crossIncompatible = crossResult === "incompativel";
+  const isHemo = hasAnyRole(["hemoterapeuta"]);
+  const overrideValid = isHemo && overrideJustification.trim().length >= 20;
+
+  const canRelease =
+    canValidate && bagConfirmed && !typingDiscrepancy && !paiBlocked &&
+    !irradiationMismatch && !typingJustifMissing && allChecked &&
+    (crossResult === "compativel" || (crossIncompatible && overrideValid));
 
   const handleCrossResult = (v: string) => {
     setCrossResult(v);
@@ -208,7 +224,10 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   const release = async () => {
     if (!req || !selectedBag) return;
     setValidating(true);
-    const checklistJson = { ...checklist };
+    const checklistJson: Record<string, any> = { ...checklist };
+    if (typingDiscrepancyConfirmed) checklistJson._typing_justification = typingJustification;
+    if (crossIncompatible) checklistJson._override_justification = overrideJustification;
+
     const { error: e1 } = await supabase.from("pre_transfusion_tests").insert({
       request_id: req.id,
       blood_unit_id: selectedBag.id,
@@ -227,10 +246,30 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
       validated_at: new Date().toISOString(),
     } as any);
     if (e1) { toast.error(e1.message); setValidating(false); return; }
+
+    // Audit log para override de prova cruzada
+    if (crossIncompatible && overrideValid) {
+      await supabase.from("audit_log").insert({
+        table_name: "pre_transfusion_tests",
+        record_id: req.id,
+        action: "cross_match_override",
+        new_data: {
+          request_id: req.id,
+          blood_unit_id: selectedBag.id,
+          patient_id: req.patient_id,
+          justification: overrideJustification,
+          performed_by: user?.id,
+        },
+        performed_by: user?.id,
+      } as any);
+    }
+
     await supabase.from("transfusion_requests").update({ status: "pronto_dispensar" as any }).eq("id", req.id);
     await supabase.from("blood_units").update({ status: "reservado" as any }).eq("id", selectedBag.id);
     setValidating(false);
-    toast.success("Validação concluída — bolsa liberada para dispensação");
+    toast.success(crossIncompatible
+      ? "Liberação registrada com OVERRIDE — auditoria gerada"
+      : "Validação concluída — bolsa liberada para dispensação");
     qc.invalidateQueries({ queryKey: ["testes-list"] });
     qc.invalidateQueries({ queryKey: ["units"] });
     onClose();
