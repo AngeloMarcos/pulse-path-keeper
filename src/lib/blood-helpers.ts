@@ -81,24 +81,35 @@ export function printDispensationLabel(opts: {
   const w = window.open("", "_blank", "width=520,height=380");
   if (!w) return;
   const bars = barcodeBars(opts.bag_number).map((b) => `<span style="display:inline-block;width:${b.width}px;height:46px;background:${b.black ? "#000" : "transparent"}"></span>`).join("");
+  const expMs = new Date(opts.expiration_date).getTime() - Date.now();
+  const expSoon = expMs < 48 * 3600 * 1000;
+  const expColor = expSoon ? "#b00020" : "#000";
+  const rh = opts.blood_type.endsWith("NEG") ? "−" : "+";
+  const abo = opts.blood_type.split("_")[0];
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Etiqueta ${opts.bag_number}</title>
   <style>
     @page { size: 100mm 70mm; margin: 4mm; }
     body { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color:#000; margin:0; padding: 6px; }
-    .head { border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 6px; display:flex; justify-content:space-between; }
-    .name { font-size: 13px; font-weight: 700; }
+    .head { border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
+    .bag { font-size: 18px; font-weight: 800; letter-spacing: .5px; }
+    .badge { display:inline-block; padding: 2px 8px; border-radius: 4px; background:#1F3864; color:#fff; font-weight:700; font-size: 12px; }
+    .name { font-size: 13px; font-weight: 700; margin-top: 2px; }
     .row { display:flex; justify-content: space-between; margin: 2px 0; }
-    .bc { text-align:center; margin: 6px 0; line-height: 0; }
+    .bc { text-align:center; margin: 4px 0; line-height: 0; }
     .bc-num { line-height: normal; font-family: monospace; font-size: 11px; margin-top: 2px; }
-    .foot { font-size: 9px; color:#444; border-top:1px dashed #888; padding-top:3px; margin-top:6px; }
+    .alert { background:#b00020; color:#fff; text-align:center; font-weight:700; font-size: 10px; padding: 3px; margin-top: 4px; letter-spacing:.3px; }
+    .foot { font-size: 9px; color:#444; border-top:1px dashed #888; padding-top:3px; margin-top:4px; }
   </style></head><body>
-  <div class="head"><div><strong>SGAT — Etiqueta de Dispensação</strong></div><div>${opts.component}</div></div>
+  <div class="head">
+    <div class="bag">${opts.bag_number}</div>
+    <div><span class="badge">${opts.component} · ${abo}${rh}</span></div>
+  </div>
   <div class="name">${opts.patient_name}</div>
   <div class="row"><span>Prontuário</span><strong>${opts.mrn}</strong></div>
-  <div class="row"><span>Grupo</span><strong>${opts.blood_type}</strong></div>
-  <div class="row"><span>Validade</span><strong>${new Date(opts.expiration_date).toLocaleDateString("pt-BR")}</strong></div>
-  <div class="row"><span>Liberada em</span><strong>${new Date(opts.released_at).toLocaleString("pt-BR")}</strong></div>
+  <div class="row"><span>Validade</span><strong style="color:${expColor}">${new Date(opts.expiration_date).toLocaleDateString("pt-BR")}${expSoon ? " ⚠" : ""}</strong></div>
+  <div class="row"><span>Dispensação</span><strong>${new Date(opts.released_at).toLocaleString("pt-BR")}</strong></div>
   <div class="bc">${bars}<div class="bc-num">${opts.bag_number}</div></div>
+  <div class="alert">CONFIRA A IDENTIDADE DO PACIENTE ANTES DE INICIAR</div>
   <div class="foot">Liberado por: ${opts.professional}</div>
   <script>window.onload = () => window.print();</script>
   </body></html>`;
