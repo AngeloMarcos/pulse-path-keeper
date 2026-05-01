@@ -1,4 +1,5 @@
 // Helpers: print HTML form (PDF via window.print) and LIS mock
+import { getHospitalName } from "./user-prefs";
 export function simulateLisFetch(): Promise<{ hb: number; ht: number; platelets: number; tp: number; ttpa: number }> {
   return new Promise((resolve) => {
     setTimeout(() => resolve({
@@ -37,7 +38,7 @@ export function printRequestPDF(req: {
   </style></head><body>
   <div class="header">
     <h1>SGAT — Solicitação de Transfusão</h1>
-    <div>Hospital — Agência Transfusional</div>
+    <div>${getHospitalName()}</div>
     <div style="font-size:10px; color:#555;">Emitido em ${new Date(req.created_at).toLocaleString("pt-BR")}</div>
   </div>
   <h2>1. Identificação do Paciente</h2>
@@ -123,7 +124,7 @@ export function printTransfusionForm(t: {
   </style></head><body>
   <div class="header">
     <h1>POP-GSAT-05 — Formulário de Acompanhamento de Transfusão</h1>
-    <div style="font-size:10px;">Hospital — Agência Transfusional · SGAT</div>
+    <div style="font-size:10px;">${getHospitalName()} · SGAT</div>
   </div>
   <h2>1. Identificação</h2>
   <table>

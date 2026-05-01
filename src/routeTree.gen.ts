@@ -22,6 +22,7 @@ import { Route as AuthenticatedReservaCirurgicaRouteImport } from './routes/_aut
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedReacoesRouteImport } from './routes/_authenticated/reacoes'
 import { Route as AuthenticatedRastreabilidadeRouteImport } from './routes/_authenticated/rastreabilidade'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPacientesRouteImport } from './routes/_authenticated/pacientes'
 import { Route as AuthenticatedIntegracaoRouteImport } from './routes/_authenticated/integracao'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
@@ -96,6 +97,11 @@ const AuthenticatedRastreabilidadeRoute =
     path: '/rastreabilidade',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPacientesRoute = AuthenticatedPacientesRouteImport.update({
   id: '/pacientes',
   path: '/pacientes',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/integracao': typeof AuthenticatedIntegracaoRoute
   '/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/reacoes': typeof AuthenticatedReacoesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/integracao': typeof AuthenticatedIntegracaoRoute
   '/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/reacoes': typeof AuthenticatedReacoesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/integracao': typeof AuthenticatedIntegracaoRoute
   '/_authenticated/pacientes': typeof AuthenticatedPacientesRouteWithChildren
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rastreabilidade': typeof AuthenticatedRastreabilidadeRoute
   '/_authenticated/reacoes': typeof AuthenticatedReacoesRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/estoque'
     | '/integracao'
     | '/pacientes'
+    | '/perfil'
     | '/rastreabilidade'
     | '/reacoes'
     | '/relatorios'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/estoque'
     | '/integracao'
     | '/pacientes'
+    | '/perfil'
     | '/rastreabilidade'
     | '/reacoes'
     | '/relatorios'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/_authenticated/estoque'
     | '/_authenticated/integracao'
     | '/_authenticated/pacientes'
+    | '/_authenticated/perfil'
     | '/_authenticated/rastreabilidade'
     | '/_authenticated/reacoes'
     | '/_authenticated/relatorios'
@@ -344,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRastreabilidadeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/pacientes': {
       id: '/_authenticated/pacientes'
       path: '/pacientes'
@@ -401,6 +420,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedIntegracaoRoute: typeof AuthenticatedIntegracaoRoute
   AuthenticatedPacientesRoute: typeof AuthenticatedPacientesRouteWithChildren
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRastreabilidadeRoute: typeof AuthenticatedRastreabilidadeRoute
   AuthenticatedReacoesRoute: typeof AuthenticatedReacoesRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
@@ -416,6 +436,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedIntegracaoRoute: AuthenticatedIntegracaoRoute,
   AuthenticatedPacientesRoute: AuthenticatedPacientesRouteWithChildren,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRastreabilidadeRoute: AuthenticatedRastreabilidadeRoute,
   AuthenticatedReacoesRoute: AuthenticatedReacoesRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
@@ -440,12 +461,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

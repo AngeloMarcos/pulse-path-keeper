@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Navigate, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useAuth, ROLE_LABELS } from "@/lib/auth";
 import { SIDEBAR_ITEMS } from "@/lib/domain";
+import { useUserPrefs } from "@/lib/user-prefs";
 import {
   SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, SidebarFooter, SidebarHeader,
@@ -12,7 +13,7 @@ import { ExpiringBanner } from "@/components/expiring-banner";
 import { SevereReactionBanner } from "@/components/severe-reaction-banner";
 import {
   LayoutDashboard, Users, ClipboardList, FlaskConical, Droplet, Activity,
-  AlertTriangle, BarChart3, LogOut, Settings, Loader2, CalendarClock, Cable, Search,
+  AlertTriangle, BarChart3, LogOut, Settings, Loader2, CalendarClock, Cable, Search, UserCog, Building2,
 } from "lucide-react";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated")({ component: AuthLayout 
 
 function AuthLayout() {
   const { loading, session, profile, roles } = useAuth();
+  const { hospital } = useUserPrefs();
 
   if (loading) {
     return (
@@ -35,14 +37,24 @@ function AuthLayout() {
   if (!session) return <Navigate to="/login" />;
   if (!profile?.active || roles.length === 0) return <Navigate to="/pending" />;
 
+  const roleLabel = roles.map((r) => ROLE_LABELS[r]).join(", ");
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 border-b bg-card flex items-center px-3 gap-2 sticky top-0 z-10">
+          <header className="h-14 border-b bg-card flex items-center px-3 gap-3 sticky top-0 z-10">
             <SidebarTrigger />
+            <div className="hidden md:flex items-center gap-2 text-sm">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium truncate max-w-[260px]">{hospital}</span>
+            </div>
             <div className="flex-1" />
+            <div className="hidden sm:flex flex-col text-right leading-tight">
+              <span className="text-sm font-medium truncate max-w-[200px]">{profile?.full_name}</span>
+              <span className="text-[11px] text-muted-foreground truncate max-w-[200px]">{roleLabel}</span>
+            </div>
             <NotificationBell />
           </header>
           <SevereReactionBanner />
@@ -107,6 +119,14 @@ function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/perfil")}>
+                  <Link to="/perfil">
+                    <UserCog className="h-4 w-4" />
+                    <span>Perfil</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
