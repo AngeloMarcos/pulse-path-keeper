@@ -42,6 +42,7 @@ export function printReportPDF(opts: {
   </style></head><body>
   <div class="header">
     <h1>${opts.title}</h1>
+    <div style="font-size:11px; color:#1F3864; font-weight:600;">${getHospitalName()}</div>
     ${opts.subtitle ? `<div style="font-size:10px;">${opts.subtitle}</div>` : ""}
     <div style="font-size:10px; color:#666;">Emitido em ${new Date().toLocaleString("pt-BR")}</div>
   </div>
