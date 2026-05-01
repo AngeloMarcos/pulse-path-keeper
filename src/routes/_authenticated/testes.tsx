@@ -510,23 +510,31 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                   ))}
                 </div>
 
-                {!crossIncompatible && (
-                  <div className="flex flex-col sm:flex-row gap-2 pt-3">
-                    <Button onClick={release} disabled={!canRelease || validating} className="flex-1">
-                      <ShieldCheck className="h-4 w-4 mr-1" />{validating ? "Validando..." : "✓ Validar e Liberar para Dispensação"}
-                    </Button>
-                    <Button variant="outline" onClick={printLabel} disabled={!selectedBag}>
-                      <Printer className="h-4 w-4 mr-1" /> Imprimir Etiqueta
-                    </Button>
-                  </div>
-                )}
-                {!canRelease && !crossIncompatible && (
+                <div className="flex flex-col sm:flex-row gap-2 pt-3">
+                  <Button onClick={release} disabled={!canRelease || validating} className="flex-1">
+                    <ShieldCheck className="h-4 w-4 mr-1" />{validating
+                      ? "Validando..."
+                      : crossIncompatible
+                        ? "⚠ Liberar com OVERRIDE (auditado)"
+                        : "✓ Validar e Liberar para Dispensação"}
+                  </Button>
+                  <Button variant="outline" onClick={printLabel} disabled={!selectedBag}>
+                    <Printer className="h-4 w-4 mr-1" /> Imprimir Etiqueta
+                  </Button>
+                </div>
+                {!canRelease && (
                   <div className="text-xs text-muted-foreground">
                     Pendências para liberar:
                     <ul className="list-disc ml-5 mt-1">
                       {!bagConfirmed && <li>Confirmar leitura da bolsa</li>}
-                      {crossResult !== "compativel" && <li>Prova cruzada compatível</li>}
+                      {!crossResult && <li>Registrar resultado da prova cruzada</li>}
+                      {crossIncompatible && !overrideValid && (
+                        <li>{isHemo
+                          ? "Justificar override (mín. 20 caracteres)"
+                          : "Apenas hemoterapeuta pode liberar bolsa incompatível"}</li>
+                      )}
                       {typingDiscrepancy && <li>Resolver discrepância de tipagem</li>}
+                      {typingJustifMissing && <li>Justificar a divergência de tipagem (mín. 10 caracteres)</li>}
                       {paiBlocked && <li>Identificar anticorpo PAI</li>}
                       {irradiationMismatch && <li>Selecionar bolsa irradiada</li>}
                       {!allChecked && <li>Marcar todos os itens do checklist</li>}
@@ -541,13 +549,53 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
 
       {/* Blocking modal for incompatible crossmatch */}
       <Dialog open={showIncompatModal} onOpenChange={setShowIncompatModal}>
-        <DialogContent className="bg-destructive text-destructive-foreground border-destructive max-w-md">
-          <DialogHeader><DialogTitle className="text-destructive-foreground flex items-center gap-2"><XCircle className="h-6 w-6" /> Prova cruzada incompatível</DialogTitle></DialogHeader>
-          <div className="text-sm">
-            🚫 <strong>LIBERAÇÃO BLOQUEADA.</strong><br />
-            Não transfundir esta bolsa. Acione o hemoterapeuta imediatamente para análise do caso.
+        <DialogContent className="bg-destructive text-destructive-foreground border-destructive max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-destructive-foreground flex items-center gap-2">
+              <XCircle className="h-6 w-6" /> INCOMPATIBILIDADE DETECTADA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-sm space-y-3">
+            <p>
+              A bolsa selecionada é <strong>INCOMPATÍVEL</strong> com este paciente.
+              Selecione outra bolsa ou contate o hemoterapeuta responsável.
+            </p>
+            {isHemo ? (
+              <div className="bg-destructive-foreground/10 border border-destructive-foreground/30 p-3 rounded space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wide">
+                  Liberação excepcional (hemoterapeuta)
+                </div>
+                <Textarea
+                  rows={3}
+                  value={overrideJustification}
+                  onChange={(e) => setOverrideJustification(e.target.value)}
+                  placeholder="Justificativa clínica (mínimo 20 caracteres)..."
+                  className="bg-background text-foreground"
+                />
+                <div className="text-[11px] opacity-90">
+                  {overrideJustification.trim().length}/20 caracteres — esta ação será registrada em audit_log.
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs opacity-90">
+                Apenas o hemoterapeuta pode autorizar a liberação desta bolsa.
+              </div>
+            )}
           </div>
-          <Button variant="secondary" onClick={() => setShowIncompatModal(false)}>Entendido</Button>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" onClick={() => setShowIncompatModal(false)}>
+              Selecionar outra bolsa
+            </Button>
+            {isHemo && (
+              <Button
+                variant="default"
+                disabled={!overrideValid}
+                onClick={() => setShowIncompatModal(false)}
+              >
+                Liberar mesmo assim
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
