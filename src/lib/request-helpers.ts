@@ -1,4 +1,5 @@
 // Helpers: print HTML form (PDF via window.print) and LIS mock
+import { getHospitalName } from "./user-prefs";
 export function simulateLisFetch(): Promise<{ hb: number; ht: number; platelets: number; tp: number; ttpa: number }> {
   return new Promise((resolve) => {
     setTimeout(() => resolve({
