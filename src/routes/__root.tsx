@@ -39,10 +39,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "HemoVida — Gestão de Hemoterapia" },
+      { title: "HemoClinic — Gestão de Hemoterapia" },
       { name: "description", content: "Sistema de gestão de banco de sangue, transfusões e hemovigilância." },
-      { property: "og:title", content: "HemoVida — Gestão de Hemoterapia" },
-      { name: "twitter:title", content: "HemoVida — Gestão de Hemoterapia" },
+      { property: "og:title", content: "HemoClinic — Gestão de Hemoterapia" },
+      { name: "twitter:title", content: "HemoClinic — Gestão de Hemoterapia" },
       { property: "og:description", content: "Sistema de gestão de banco de sangue, transfusões e hemovigilância." },
       { name: "twitter:description", content: "Sistema de gestão de banco de sangue, transfusões e hemovigilância." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b5a9ca5-d432-4bfd-b724-483d0c892479/id-preview-5471a775--5fdc85bc-4717-4bbb-ba2e-df3f234e5762.lovable.app-1777581571040.png" },
