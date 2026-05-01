@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Search, PackagePlus, ClipboardCheck, FlaskConical, ShieldCheck, Truck,
+  Search, PackagePlus, FlaskConical, ShieldCheck, Truck,
   Activity, AlertTriangle, Trash2, FileText, User, Calendar,
 } from "lucide-react";
 import { BLOOD_TYPE_LABELS, COMPONENT_LABELS, statusBadgeClass } from "@/lib/domain";
