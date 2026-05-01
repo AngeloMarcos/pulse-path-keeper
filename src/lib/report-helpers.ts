@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { getHospitalName } from "./user-prefs";
 
 export function exportToXLSX(filename: string, sheets: { name: string; rows: any[] }[]) {
   const wb = XLSX.utils.book_new();
