@@ -44,7 +44,7 @@ function LoginPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/15">
             <Droplet className="h-7 w-7 text-primary" fill="currentColor" />
           </div>
-          <CardTitle className="text-2xl">SGAT</CardTitle>
+          <CardTitle className="text-2xl">HemoClinic</CardTitle>
           <CardDescription>Sistema de Gestão de Agência Transfusional</CardDescription>
         </CardHeader>
         <CardContent>

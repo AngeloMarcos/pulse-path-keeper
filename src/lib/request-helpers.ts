@@ -92,7 +92,7 @@ export function printRequestPDF(req: {
     .urg { color:#b00; font-weight:bold; }
   </style></head><body>
   <div class="header">
-    <h1>SGAT — Solicitação de Transfusão</h1>
+    <h1>HemoClinic — Solicitação de Transfusão</h1>
     <div>${getHospitalName()}</div>
     <div style="font-size:10px; color:#555;">Emitido em ${new Date(req.created_at).toLocaleString("pt-BR")}</div>
   </div>
@@ -179,7 +179,7 @@ export function printTransfusionForm(t: {
   </style></head><body>
   <div class="header">
     <h1>POP-GSAT-05 — Formulário de Acompanhamento de Transfusão</h1>
-    <div style="font-size:10px;">${getHospitalName()} · SGAT</div>
+    <div style="font-size:10px;">${getHospitalName()} · HemoClinic</div>
   </div>
   <h2>1. Identificação</h2>
   <table>
