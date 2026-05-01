@@ -119,6 +119,14 @@ function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/perfil")}>
+                  <Link to="/perfil">
+                    <UserCog className="h-4 w-4" />
+                    <span>Perfil</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
