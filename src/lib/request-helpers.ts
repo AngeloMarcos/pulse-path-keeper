@@ -124,7 +124,7 @@ export function printTransfusionForm(t: {
   </style></head><body>
   <div class="header">
     <h1>POP-GSAT-05 — Formulário de Acompanhamento de Transfusão</h1>
-    <div style="font-size:10px;">Hospital — Agência Transfusional · SGAT</div>
+    <div style="font-size:10px;">${getHospitalName()} · SGAT</div>
   </div>
   <h2>1. Identificação</h2>
   <table>
