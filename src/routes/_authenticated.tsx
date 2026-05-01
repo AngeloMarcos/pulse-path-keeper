@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Navigate, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useAuth, ROLE_LABELS } from "@/lib/auth";
 import { SIDEBAR_ITEMS } from "@/lib/domain";
+import { useUserPrefs } from "@/lib/user-prefs";
 import {
   SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, SidebarFooter, SidebarHeader,
@@ -12,7 +13,7 @@ import { ExpiringBanner } from "@/components/expiring-banner";
 import { SevereReactionBanner } from "@/components/severe-reaction-banner";
 import {
   LayoutDashboard, Users, ClipboardList, FlaskConical, Droplet, Activity,
-  AlertTriangle, BarChart3, LogOut, Settings, Loader2, CalendarClock, Cable, Search,
+  AlertTriangle, BarChart3, LogOut, Settings, Loader2, CalendarClock, Cable, Search, UserCog, Building2,
 } from "lucide-react";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
