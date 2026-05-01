@@ -720,6 +720,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_audit_log: {
+        Args: {
+          p_action: string
+          p_new?: Json
+          p_old?: Json
+          p_record_id: string
+          p_table: string
+        }
+        Returns: number
+      }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
