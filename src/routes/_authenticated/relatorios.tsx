@@ -524,3 +524,104 @@ function KPI({ label, value }: { label: string; value: any }) {
     </CardContent></Card>
   );
 }
+
+const SEVERITY_LABELS: Record<string, string> = {
+  leve: "Leve", moderada: "Moderada", grave: "Grave", fatal: "Fatal",
+};
+const CLASSIFICATION_LABELS: Record<string, string> = {
+  definida: "Definida", provavel: "Provável", possivel: "Possível",
+  improvavel: "Improvável", descartada: "Descartada",
+};
+
+function AnvisaReport({ filters }: { filters: Filters }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["rep-anvisa", filters],
+    queryFn: async () => {
+      const { data: r } = await supabase
+        .from("adverse_reactions")
+        .select("id, notification_datetime, reaction_type, severity, final_classification, outcome, patient:patients(full_name, mrn)")
+        .gte("notification_datetime", filters.from)
+        .lte("notification_datetime", filters.to + "T23:59:59")
+        .order("notification_datetime", { ascending: false });
+      const { count } = await supabase.from("transfusions").select("id", { count: "exact", head: true })
+        .gte("started_at", filters.from).lte("started_at", filters.to + "T23:59:59");
+      return { reactions: (r ?? []) as any[], totalTrans: count ?? 0 };
+    },
+  });
+
+  const rate = useMemo(() => {
+    if (!data?.totalTrans) return "0,00";
+    return ((data.reactions.length / data.totalTrans) * 100).toFixed(2).replace(".", ",");
+  }, [data]);
+
+  if (isLoading) return <Skeleton className="h-96 w-full" />;
+
+  const tableRows = (data?.reactions ?? []).map((r) => ({
+    Data: new Date(r.notification_datetime).toLocaleString("pt-BR"),
+    Paciente: `${r.patient?.full_name ?? "—"} (MRN ${r.patient?.mrn ?? "—"})`,
+    "Tipo Reação": r.reaction_type,
+    Gravidade: SEVERITY_LABELS[r.severity] ?? r.severity,
+    Imputabilidade: r.final_classification ? (CLASSIFICATION_LABELS[r.final_classification] ?? r.final_classification) : "—",
+    Desfecho: r.outcome ?? "—",
+  }));
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <KPI label="Total de reações" value={data?.reactions.length ?? 0} />
+        <KPI label="Total de transfusões" value={data?.totalTrans ?? 0} />
+        <KPI label="Taxa de reação (%)" value={rate} />
+      </div>
+      <Card>
+        <CardHeader><CardTitle>Hemovigilância — ANVISA</CardTitle></CardHeader>
+        <CardContent>
+          <ExportBar
+            pdfTitle="Hemovigilância — ANVISA"
+            filters={{ ...buildFiltersText(filters), "Taxa de reação": `${rate}%` }}
+            sections={[{
+              heading: "Reações adversas no período",
+              columns: ["Data", "Paciente", "Tipo Reação", "Gravidade", "Imputabilidade", "Desfecho"],
+              rows: tableRows.map((r) => [r.Data, r.Paciente, r["Tipo Reação"], r.Gravidade, r.Imputabilidade, r.Desfecho]),
+            }]}
+            xlsxName="anvisa-hemovigilancia.xlsx"
+            sheets={[{ name: "Reações", rows: tableRows }]}
+          />
+          <div className="rounded border overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-2">Data</th>
+                  <th className="text-left p-2">Paciente</th>
+                  <th className="text-left p-2">Tipo Reação</th>
+                  <th className="text-left p-2">Gravidade</th>
+                  <th className="text-left p-2">Imputabilidade</th>
+                  <th className="text-left p-2">Desfecho</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableRows.length === 0 ? (
+                  <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">Nenhuma reação no período.</td></tr>
+                ) : tableRows.map((r, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2 whitespace-nowrap">{r.Data}</td>
+                    <td className="p-2">{r.Paciente}</td>
+                    <td className="p-2">{r["Tipo Reação"]}</td>
+                    <td className="p-2">
+                      <span className={
+                        r.Gravidade === "Grave" || r.Gravidade === "Fatal"
+                          ? "text-destructive font-semibold"
+                          : r.Gravidade === "Moderada" ? "text-amber-500" : ""
+                      }>{r.Gravidade}</span>
+                    </td>
+                    <td className="p-2">{r.Imputabilidade}</td>
+                    <td className="p-2">{r.Desfecho}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
