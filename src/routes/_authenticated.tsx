@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ExpiringBanner } from "@/components/expiring-banner";
 import { SevereReactionBanner } from "@/components/severe-reaction-banner";
 import {
@@ -55,6 +56,7 @@ function AuthLayout() {
               <span className="text-sm font-medium truncate max-w-[200px]">{profile?.full_name}</span>
               <span className="text-[11px] text-muted-foreground truncate max-w-[200px]">{roleLabel}</span>
             </div>
+            <ThemeToggle />
             <NotificationBell />
           </header>
           <SevereReactionBanner />

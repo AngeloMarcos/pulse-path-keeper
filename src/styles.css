@@ -42,16 +42,51 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Dark-first clinical theme — primary #1F3864 */
+/* Light clinical theme — default. Soft white background, clinical blue #1F3864. */
 :root {
   --radius: 0.5rem;
+  --background: oklch(0.985 0.004 240);
+  --foreground: oklch(0.20 0.02 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.20 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.20 0.02 250);
+  /* #1F3864 ≈ oklch(0.31 0.09 263) */
+  --primary: oklch(0.36 0.10 263);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.95 0.012 240);
+  --secondary-foreground: oklch(0.22 0.02 250);
+  --muted: oklch(0.96 0.008 240);
+  --muted-foreground: oklch(0.48 0.018 250);
+  --accent: oklch(0.93 0.025 245);
+  --accent-foreground: oklch(0.22 0.05 263);
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 25);
+  --success: oklch(0.58 0.15 150);
+  --success-foreground: oklch(0.99 0.005 150);
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.18 0.02 75);
+  --border: oklch(0.88 0.012 240);
+  --input: oklch(0.92 0.012 240);
+  --ring: oklch(0.36 0.10 263);
+  --sidebar: oklch(0.975 0.006 240);
+  --sidebar-foreground: oklch(0.22 0.02 250);
+  --sidebar-primary: oklch(0.36 0.10 263);
+  --sidebar-primary-foreground: oklch(0.99 0.005 250);
+  --sidebar-accent: oklch(0.93 0.018 245);
+  --sidebar-accent-foreground: oklch(0.22 0.05 263);
+  --sidebar-border: oklch(0.88 0.012 240);
+  --sidebar-ring: oklch(0.36 0.10 263);
+}
+
+/* Dark clinical theme */
+.dark {
   --background: oklch(0.16 0.018 250);
   --foreground: oklch(0.96 0.005 250);
   --card: oklch(0.21 0.022 250);
   --card-foreground: oklch(0.96 0.005 250);
   --popover: oklch(0.21 0.022 250);
   --popover-foreground: oklch(0.96 0.005 250);
-  /* #1F3864 ≈ oklch(0.31 0.09 263) */
   --primary: oklch(0.42 0.12 263);
   --primary-foreground: oklch(0.99 0.005 250);
   --secondary: oklch(0.27 0.025 250);
