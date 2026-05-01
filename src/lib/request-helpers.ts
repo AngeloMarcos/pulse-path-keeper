@@ -47,10 +47,10 @@ export async function simulateLisFetch(
   }
 
   try {
-    await supabase.from("his_lis_events").insert({
-      integration_type: "lis",
-      direction: "inbound",
-      status: "ok",
+    const event = {
+      integration_type: "LIS" as const,
+      direction: "receive" as const,
+      status: "success" as const,
       endpoint: "lis://lab/results",
       payload: {
         kind: "lis_lab_result",
@@ -58,7 +58,8 @@ export async function simulateLisFetch(
         request_id: requestId ?? null,
         ...result,
       },
-    });
+    };
+    await supabase.from("his_lis_events").insert(event);
   } catch {
     // best-effort log
   }
