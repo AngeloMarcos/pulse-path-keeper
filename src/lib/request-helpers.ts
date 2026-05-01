@@ -17,8 +17,8 @@ export async function simulateLisFetch(
     const { data } = await supabase
       .from("his_lis_events")
       .select("payload, created_at")
-      .eq("integration_type", "lis")
-      .eq("direction", "inbound")
+      .eq("integration_type", "LIS")
+      .eq("direction", "receive")
       .order("created_at", { ascending: false })
       .limit(20);
     const last = (data ?? []).find((e: any) => e?.payload?.patient_id === patientId && e?.payload?.kind === "lis_lab_result");
