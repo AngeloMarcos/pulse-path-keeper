@@ -1,15 +1,70 @@
 // Helpers: print HTML form (PDF via window.print) and LIS mock
 import { getHospitalName } from "./user-prefs";
-export function simulateLisFetch(): Promise<{ hb: number; ht: number; platelets: number; tp: number; ttpa: number }> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({
-      hb: +(7 + Math.random() * 5).toFixed(1),
-      ht: +(22 + Math.random() * 15).toFixed(1),
+import { supabase } from "@/integrations/supabase/client";
+
+/**
+ * Busca o último resultado laboratorial do paciente em his_lis_events
+ * (kind='lis_lab_result'). Se não houver, gera valores fictícios.
+ * Sempre registra um novo evento inbound em his_lis_events.
+ */
+export async function simulateLisFetch(
+  patientId?: string,
+  requestId?: string,
+): Promise<{ hb: number; ht: number; platelets: number; tp: number; ttpa: number }> {
+  let result: { hb: number; ht: number; platelets: number; tp: number; ttpa: number } | null = null;
+
+  if (patientId) {
+    const { data } = await supabase
+      .from("his_lis_events")
+      .select("payload, created_at")
+      .eq("integration_type", "LIS")
+      .eq("direction", "receive")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const last = (data ?? []).find((e: any) => e?.payload?.patient_id === patientId && e?.payload?.kind === "lis_lab_result");
+    if (last && last.payload) {
+      const p: any = last.payload;
+      if (p.hb != null && p.ht != null) {
+        result = {
+          hb: Number(p.hb),
+          ht: Number(p.ht),
+          platelets: Number(p.platelets ?? 200),
+          tp: Number(p.tp ?? 1.1),
+          ttpa: Number(p.ttpa ?? 32),
+        };
+      }
+    }
+  }
+
+  if (!result) {
+    result = {
+      hb: +(7 + Math.random() * 7.5).toFixed(1),
+      ht: +(22 + Math.random() * 23).toFixed(1),
       platelets: Math.round(50 + Math.random() * 250),
       tp: +(1 + Math.random() * 0.5).toFixed(2),
       ttpa: +(28 + Math.random() * 15).toFixed(1),
-    }), 800);
-  });
+    };
+  }
+
+  try {
+    const event = {
+      integration_type: "LIS" as const,
+      direction: "receive" as const,
+      status: "success" as const,
+      endpoint: "lis://lab/results",
+      payload: {
+        kind: "lis_lab_result",
+        patient_id: patientId ?? null,
+        request_id: requestId ?? null,
+        ...result,
+      },
+    };
+    await supabase.from("his_lis_events").insert(event);
+  } catch {
+    // best-effort log
+  }
+
+  return result;
 }
 
 export function printRequestPDF(req: {
