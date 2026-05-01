@@ -125,6 +125,9 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   const [crossMethod, setCrossMethod] = useState<string>("gel");
   const [crossNotes, setCrossNotes] = useState("");
   const [showIncompatModal, setShowIncompatModal] = useState(false);
+  const [overrideJustification, setOverrideJustification] = useState("");
+  // Tipagem divergente
+  const [typingJustification, setTypingJustification] = useState("");
   // Checklist
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     tipagem: false, pai: false, prova: false, validade: false, integridade: false, rotulo: false,
@@ -146,7 +149,7 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   useEffect(() => {
     if (!id) return;
     setTab("tipagem"); setSelectedBag(null); setBagConfirmInput(""); setBagConfirmed(false);
-    setCrossResult(""); setCrossNotes("");
+    setCrossResult(""); setCrossNotes(""); setOverrideJustification(""); setTypingJustification("");
     setChecklist({ tipagem: false, pai: false, prova: false, validade: false, integridade: false, rotulo: false });
     if (req?.patients) {
       setAboReceptor(aboFromBloodType(req.patients.blood_type));
@@ -176,7 +179,16 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
 
   const cadastroBT = req?.patients?.blood_type ?? "";
   const digitadoBT = aboReceptor && rhReceptor ? `${aboReceptor}_${rhReceptor === "+" ? "POS" : "NEG"}` : "";
-  const typingDiscrepancy = cadastroBT && cadastroBT !== "NAO_TIPADO" && digitadoBT && digitadoBT !== cadastroBT;
+  // Tipagem confirmada no histórico e diverge do digitado: alerta amarelo + justificativa obrigatória (não bloqueia)
+  const typingDiscrepancyConfirmed =
+    !!req?.patients?.blood_type_confirmed &&
+    cadastroBT && cadastroBT !== "NAO_TIPADO" &&
+    !!digitadoBT && digitadoBT !== cadastroBT;
+  // Diferente sem confirmação: divergência genérica (alerta vermelho original)
+  const typingDiscrepancy =
+    !req?.patients?.blood_type_confirmed &&
+    cadastroBT && cadastroBT !== "NAO_TIPADO" &&
+    !!digitadoBT && digitadoBT !== cadastroBT;
 
   const irradiationMismatch = selectedBag && req?.patients?.irradiation_required && !selectedBag.irradiated;
   const cmvMismatch = selectedBag && req?.patients?.cmv_negative_required && !selectedBag.cmv_negative;
@@ -193,9 +205,16 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   };
 
   const paiBlocked = paiResult === "positivo" && !paiAntibody.trim();
+  const typingJustifMissing = typingDiscrepancyConfirmed && typingJustification.trim().length < 10;
   const allChecked = Object.values(checklist).every(Boolean);
-  const canRelease = canValidate && bagConfirmed && crossResult === "compativel" && !typingDiscrepancy && !paiBlocked && !irradiationMismatch && allChecked;
   const crossIncompatible = crossResult === "incompativel";
+  const isHemo = hasAnyRole(["hemoterapeuta"]);
+  const overrideValid = isHemo && overrideJustification.trim().length >= 20;
+
+  const canRelease =
+    canValidate && bagConfirmed && !typingDiscrepancy && !paiBlocked &&
+    !irradiationMismatch && !typingJustifMissing && allChecked &&
+    (crossResult === "compativel" || (crossIncompatible && overrideValid));
 
   const handleCrossResult = (v: string) => {
     setCrossResult(v);
@@ -205,7 +224,10 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
   const release = async () => {
     if (!req || !selectedBag) return;
     setValidating(true);
-    const checklistJson = { ...checklist };
+    const checklistJson: Record<string, any> = { ...checklist };
+    if (typingDiscrepancyConfirmed) checklistJson._typing_justification = typingJustification;
+    if (crossIncompatible) checklistJson._override_justification = overrideJustification;
+
     const { error: e1 } = await supabase.from("pre_transfusion_tests").insert({
       request_id: req.id,
       blood_unit_id: selectedBag.id,
@@ -224,10 +246,30 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
       validated_at: new Date().toISOString(),
     } as any);
     if (e1) { toast.error(e1.message); setValidating(false); return; }
+
+    // Audit log para override de prova cruzada
+    if (crossIncompatible && overrideValid) {
+      await supabase.from("audit_log").insert({
+        table_name: "pre_transfusion_tests",
+        record_id: req.id,
+        action: "cross_match_override",
+        new_data: {
+          request_id: req.id,
+          blood_unit_id: selectedBag.id,
+          patient_id: req.patient_id,
+          justification: overrideJustification,
+          performed_by: user?.id,
+        },
+        performed_by: user?.id,
+      } as any);
+    }
+
     await supabase.from("transfusion_requests").update({ status: "pronto_dispensar" as any }).eq("id", req.id);
     await supabase.from("blood_units").update({ status: "reservado" as any }).eq("id", selectedBag.id);
     setValidating(false);
-    toast.success("Validação concluída — bolsa liberada para dispensação");
+    toast.success(crossIncompatible
+      ? "Liberação registrada com OVERRIDE — auditoria gerada"
+      : "Validação concluída — bolsa liberada para dispensação");
     qc.invalidateQueries({ queryKey: ["testes-list"] });
     qc.invalidateQueries({ queryKey: ["units"] });
     onClose();
@@ -304,6 +346,27 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                   </div>
                 )}
 
+                {typingDiscrepancyConfirmed && (
+                  <div className="bg-warning/15 border border-warning/40 text-warning-foreground p-3 rounded space-y-2 text-sm">
+                    <div className="flex gap-2 text-warning">
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Atenção: tipagem diverge do histórico confirmado.</strong>
+                        {" "}Cadastrado: <strong>{BLOOD_TYPE_LABELS[cadastroBT]}</strong>,
+                        {" "}digitado: <strong>{BLOOD_TYPE_LABELS[digitadoBT]}</strong>.
+                      </div>
+                    </div>
+                    <Field label="Justificativa da divergência" required>
+                      <Textarea
+                        rows={2}
+                        value={typingJustification}
+                        onChange={(e) => setTypingJustification(e.target.value)}
+                        placeholder="Descreva a justificativa (mínimo 10 caracteres)..."
+                      />
+                    </Field>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t">
                   <Field label="PAI">
                     <Select value={paiResult} onValueChange={setPaiResult}>
@@ -321,6 +384,12 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                     </Field>
                   )}
                 </div>
+                {paiBlocked && (
+                  <div className="bg-warning/15 border border-warning/40 text-warning p-3 rounded flex gap-2 text-sm">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <div><strong>PAI positivo</strong> — identifique o anticorpo antes de liberar.</div>
+                  </div>
+                )}
                 <div className="text-xs text-muted-foreground">Profissional: {profile?.full_name} • {new Date().toLocaleString("pt-BR")}</div>
               </TabsContent>
 
@@ -441,23 +510,31 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                   ))}
                 </div>
 
-                {!crossIncompatible && (
-                  <div className="flex flex-col sm:flex-row gap-2 pt-3">
-                    <Button onClick={release} disabled={!canRelease || validating} className="flex-1">
-                      <ShieldCheck className="h-4 w-4 mr-1" />{validating ? "Validando..." : "✓ Validar e Liberar para Dispensação"}
-                    </Button>
-                    <Button variant="outline" onClick={printLabel} disabled={!selectedBag}>
-                      <Printer className="h-4 w-4 mr-1" /> Imprimir Etiqueta
-                    </Button>
-                  </div>
-                )}
-                {!canRelease && !crossIncompatible && (
+                <div className="flex flex-col sm:flex-row gap-2 pt-3">
+                  <Button onClick={release} disabled={!canRelease || validating} className="flex-1">
+                    <ShieldCheck className="h-4 w-4 mr-1" />{validating
+                      ? "Validando..."
+                      : crossIncompatible
+                        ? "⚠ Liberar com OVERRIDE (auditado)"
+                        : "✓ Validar e Liberar para Dispensação"}
+                  </Button>
+                  <Button variant="outline" onClick={printLabel} disabled={!selectedBag}>
+                    <Printer className="h-4 w-4 mr-1" /> Imprimir Etiqueta
+                  </Button>
+                </div>
+                {!canRelease && (
                   <div className="text-xs text-muted-foreground">
                     Pendências para liberar:
                     <ul className="list-disc ml-5 mt-1">
                       {!bagConfirmed && <li>Confirmar leitura da bolsa</li>}
-                      {crossResult !== "compativel" && <li>Prova cruzada compatível</li>}
+                      {!crossResult && <li>Registrar resultado da prova cruzada</li>}
+                      {crossIncompatible && !overrideValid && (
+                        <li>{isHemo
+                          ? "Justificar override (mín. 20 caracteres)"
+                          : "Apenas hemoterapeuta pode liberar bolsa incompatível"}</li>
+                      )}
                       {typingDiscrepancy && <li>Resolver discrepância de tipagem</li>}
+                      {typingJustifMissing && <li>Justificar a divergência de tipagem (mín. 10 caracteres)</li>}
                       {paiBlocked && <li>Identificar anticorpo PAI</li>}
                       {irradiationMismatch && <li>Selecionar bolsa irradiada</li>}
                       {!allChecked && <li>Marcar todos os itens do checklist</li>}
@@ -472,13 +549,53 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
 
       {/* Blocking modal for incompatible crossmatch */}
       <Dialog open={showIncompatModal} onOpenChange={setShowIncompatModal}>
-        <DialogContent className="bg-destructive text-destructive-foreground border-destructive max-w-md">
-          <DialogHeader><DialogTitle className="text-destructive-foreground flex items-center gap-2"><XCircle className="h-6 w-6" /> Prova cruzada incompatível</DialogTitle></DialogHeader>
-          <div className="text-sm">
-            🚫 <strong>LIBERAÇÃO BLOQUEADA.</strong><br />
-            Não transfundir esta bolsa. Acione o hemoterapeuta imediatamente para análise do caso.
+        <DialogContent className="bg-destructive text-destructive-foreground border-destructive max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-destructive-foreground flex items-center gap-2">
+              <XCircle className="h-6 w-6" /> INCOMPATIBILIDADE DETECTADA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-sm space-y-3">
+            <p>
+              A bolsa selecionada é <strong>INCOMPATÍVEL</strong> com este paciente.
+              Selecione outra bolsa ou contate o hemoterapeuta responsável.
+            </p>
+            {isHemo ? (
+              <div className="bg-destructive-foreground/10 border border-destructive-foreground/30 p-3 rounded space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wide">
+                  Liberação excepcional (hemoterapeuta)
+                </div>
+                <Textarea
+                  rows={3}
+                  value={overrideJustification}
+                  onChange={(e) => setOverrideJustification(e.target.value)}
+                  placeholder="Justificativa clínica (mínimo 20 caracteres)..."
+                  className="bg-background text-foreground"
+                />
+                <div className="text-[11px] opacity-90">
+                  {overrideJustification.trim().length}/20 caracteres — esta ação será registrada em audit_log.
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs opacity-90">
+                Apenas o hemoterapeuta pode autorizar a liberação desta bolsa.
+              </div>
+            )}
           </div>
-          <Button variant="secondary" onClick={() => setShowIncompatModal(false)}>Entendido</Button>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" onClick={() => setShowIncompatModal(false)}>
+              Selecionar outra bolsa
+            </Button>
+            {isHemo && (
+              <Button
+                variant="default"
+                disabled={!overrideValid}
+                onClick={() => setShowIncompatModal(false)}
+              >
+                Liberar mesmo assim
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>

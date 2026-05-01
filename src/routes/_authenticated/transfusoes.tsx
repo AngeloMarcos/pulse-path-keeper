@@ -294,6 +294,24 @@ function DeliveryForm({ request, onDone }: { request: QueueRow; onDone: () => vo
   }, [scanCode, unit?.bag_number]);
 
   async function confirmDelivery() {
+    // Bloqueio: bolsa vencida
+    if (unit?.expiration_date) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const exp = new Date(unit.expiration_date); exp.setHours(0, 0, 0, 0);
+      if (exp < today) {
+        toast.error("Bolsa vencida — dispensação bloqueada.");
+        // Descarte automático
+        await supabase
+          .from("blood_units")
+          .update({
+            status: "descartado",
+            discard_reason: "vencimento",
+            discarded_at: new Date().toISOString(),
+          } as any)
+          .eq("id", unit.id);
+        return;
+      }
+    }
     if (scanCode.trim() !== unit?.bag_number) {
       toast.error("Código da bolsa não confere — processo interrompido.");
       return;
