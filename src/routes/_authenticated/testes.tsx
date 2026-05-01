@@ -346,6 +346,27 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                   </div>
                 )}
 
+                {typingDiscrepancyConfirmed && (
+                  <div className="bg-warning/15 border border-warning/40 text-warning-foreground p-3 rounded space-y-2 text-sm">
+                    <div className="flex gap-2 text-warning">
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Atenção: tipagem diverge do histórico confirmado.</strong>
+                        {" "}Cadastrado: <strong>{BLOOD_TYPE_LABELS[cadastroBT]}</strong>,
+                        {" "}digitado: <strong>{BLOOD_TYPE_LABELS[digitadoBT]}</strong>.
+                      </div>
+                    </div>
+                    <Field label="Justificativa da divergência" required>
+                      <Textarea
+                        rows={2}
+                        value={typingJustification}
+                        onChange={(e) => setTypingJustification(e.target.value)}
+                        placeholder="Descreva a justificativa (mínimo 10 caracteres)..."
+                      />
+                    </Field>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t">
                   <Field label="PAI">
                     <Select value={paiResult} onValueChange={setPaiResult}>
@@ -363,6 +384,12 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
                     </Field>
                   )}
                 </div>
+                {paiBlocked && (
+                  <div className="bg-warning/15 border border-warning/40 text-warning p-3 rounded flex gap-2 text-sm">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <div><strong>PAI positivo</strong> — identifique o anticorpo antes de liberar.</div>
+                  </div>
+                )}
                 <div className="text-xs text-muted-foreground">Profissional: {profile?.full_name} • {new Date().toLocaleString("pt-BR")}</div>
               </TabsContent>
 
