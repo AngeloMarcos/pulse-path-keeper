@@ -344,6 +344,21 @@ function DeliveryForm({ request, onDone }: { request: QueueRow; onDone: () => vo
     await supabase.from("transfusion_requests").update({ status: "transfundindo" }).eq("id", request.id);
     await supabase.from("blood_units").update({ status: "dispensado" }).eq("id", unit.id);
 
+    // Audit log: transfusão iniciada
+    await supabase.rpc("insert_audit_log", {
+      p_table: "transfusions",
+      p_record_id: tr.id,
+      p_action: "transfusion_started",
+      p_new: {
+        transfusion_id: tr.id,
+        request_id: request.id,
+        blood_unit_id: unit.id,
+        patient_id: patient.id,
+        bag_number: unit.bag_number,
+        ward,
+      } as any,
+    });
+
     setTransfusionId(tr.id);
     toast.success("Entrega confirmada — acompanhamento aberto.");
     setStep(2);
@@ -397,6 +412,22 @@ function DeliveryForm({ request, onDone }: { request: QueueRow; onDone: () => vo
       status: "success",
       payload: { transfusion_id: transfusionId, patient_mrn: patient.mrn, bag: unit.bag_number, volume_ml: Number(volTotal) || null, completed: !suspended } as any,
     } as any);
+
+    // Audit log: transfusão concluída
+    await supabase.rpc("insert_audit_log", {
+      p_table: "transfusions",
+      p_record_id: transfusionId,
+      p_action: "transfusion_completed",
+      p_new: {
+        transfusion_id: transfusionId,
+        patient_id: patient.id,
+        blood_unit_id: unit.id,
+        volume_ml: Number(volTotal) || null,
+        completed: !suspended,
+        suspended,
+        intercurrence,
+      } as any,
+    });
 
     toast.success("Transfusão concluída e registrada com sucesso.");
     setTimeout(() => toast.success("✓ Dados enviados ao prontuário eletrônico"), 600);

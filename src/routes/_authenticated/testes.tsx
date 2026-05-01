@@ -249,23 +249,34 @@ function PreTransfusionDialog({ id, onClose }: { id: string | null; onClose: () 
 
     // Audit log para override de prova cruzada
     if (crossIncompatible && overrideValid) {
-      await supabase.from("audit_log").insert({
-        table_name: "pre_transfusion_tests",
-        record_id: req.id,
-        action: "cross_match_override",
-        new_data: {
+      await supabase.rpc("insert_audit_log", {
+        p_table: "pre_transfusion_tests",
+        p_record_id: req.id,
+        p_action: "cross_match_override",
+        p_new: {
           request_id: req.id,
           blood_unit_id: selectedBag.id,
           patient_id: req.patient_id,
           justification: overrideJustification,
-          performed_by: user?.id,
-        },
-        performed_by: user?.id,
-      } as any);
+        } as any,
+      });
     }
 
     await supabase.from("transfusion_requests").update({ status: "pronto_dispensar" as any }).eq("id", req.id);
     await supabase.from("blood_units").update({ status: "reservado" as any }).eq("id", selectedBag.id);
+
+    // Audit log: bolsa liberada para dispensação
+    await supabase.rpc("insert_audit_log", {
+      p_table: "blood_units",
+      p_record_id: selectedBag.id,
+      p_action: "blood_unit_released",
+      p_new: {
+        request_id: req.id,
+        blood_unit_id: selectedBag.id,
+        patient_id: req.patient_id,
+        bag_number: selectedBag.bag_number,
+      } as any,
+    });
     setValidating(false);
     toast.success(crossIncompatible
       ? "Liberação registrada com OVERRIDE — auditoria gerada"

@@ -204,6 +204,12 @@ function DiscardDialog({ unit, onClose, onDone }: { unit: any | null; onClose: (
     }).eq("id", unit.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    await supabase.rpc("insert_audit_log", {
+      p_table: "blood_units",
+      p_record_id: unit.id,
+      p_action: "unit_discarded",
+      p_new: { bag_number: unit.bag_number, reason, notes } as any,
+    });
     toast.success("Bolsa descartada");
     onDone(); onClose();
   };

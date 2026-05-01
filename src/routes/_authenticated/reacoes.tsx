@@ -403,6 +403,13 @@ function FitForm({ existing, prefill, onSaved }: { existing?: any; prefill?: any
         direction: "outbound", integration_type: "his", endpoint: "/his/fit-finalized",
         status: "success", payload: { fit_id: id, severity, classification: finalClass } as any,
       } as any);
+      // Audit log: FIT fechada
+      await supabase.rpc("insert_audit_log", {
+        p_table: "adverse_reactions",
+        p_record_id: id!,
+        p_action: "fit_closed",
+        p_new: { fit_id: id, patient_id: patientId, severity, final_classification: finalClass } as any,
+      });
       toast.success("FIT fechada e arquivada.");
     } else {
       toast.success("FIT salva.");
