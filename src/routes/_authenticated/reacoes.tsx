@@ -436,7 +436,7 @@ function FitForm({ existing, prefill, onSaved }: { existing?: any; prefill?: any
 </style></head><body>
 <div class="header">
   <h1>FP.ATRA.005-00 — Ficha de Investigação Transfusional (FIT)</h1>
-  <div style="font-size:10px;">Hospital — Agência Transfusional · SGAT</div>
+  <div style="font-size:10px;">Hospital — Agência Transfusional · HemoClinic</div>
 </div>
 <h2>1. Notificação</h2>
 <table>

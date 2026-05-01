@@ -205,10 +205,10 @@ function FieldMapping() {
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Mapeamento de campos (LIS → SGAT)</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-base">Mapeamento de campos (LIS → HemoClinic)</CardTitle></CardHeader>
       <CardContent className="space-y-2">
         <table className="w-full text-sm">
-          <thead><tr className="text-muted-foreground border-b"><th className="text-left p-2">Campo LIS</th><th className="text-left p-2">→</th><th className="text-left p-2">Campo SGAT</th><th></th></tr></thead>
+          <thead><tr className="text-muted-foreground border-b"><th className="text-left p-2">Campo LIS</th><th className="text-left p-2">→</th><th className="text-left p-2">Campo HemoClinic</th><th></th></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i} className="border-b">

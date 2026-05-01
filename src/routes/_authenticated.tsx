@@ -85,7 +85,7 @@ function AppSidebar() {
             <Droplet className="h-4 w-4 text-destructive" />
           </div>
           <div>
-            <div className="font-semibold text-sm leading-tight">SGAT</div>
+            <div className="font-semibold text-sm leading-tight">HemoClinic</div>
             <div className="text-[10px] text-muted-foreground leading-tight">Agência Transfusional</div>
           </div>
         </div>
