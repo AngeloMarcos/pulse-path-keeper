@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ExpiringBanner } from "@/components/expiring-banner";
 import { SevereReactionBanner } from "@/components/severe-reaction-banner";
 import {
