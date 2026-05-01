@@ -38,7 +38,7 @@ export function printRequestPDF(req: {
   </style></head><body>
   <div class="header">
     <h1>SGAT — Solicitação de Transfusão</h1>
-    <div>Hospital — Agência Transfusional</div>
+    <div>${getHospitalName()}</div>
     <div style="font-size:10px; color:#555;">Emitido em ${new Date(req.created_at).toLocaleString("pt-BR")}</div>
   </div>
   <h2>1. Identificação do Paciente</h2>
