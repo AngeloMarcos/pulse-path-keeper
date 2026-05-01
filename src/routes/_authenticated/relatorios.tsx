@@ -64,6 +64,7 @@ function ReportsPage() {
           <TabsTrigger value="surgical">Reservas Cirúrgicas</TabsTrigger>
           <TabsTrigger value="time">Tempo de Atendimento</TabsTrigger>
           <TabsTrigger value="ward">Consumo por Setor</TabsTrigger>
+          <TabsTrigger value="anvisa">ANVISA</TabsTrigger>
         </TabsList>
         <TabsContent value="prod" className="mt-4"><ProductionReport filters={filters} /></TabsContent>
         <TabsContent value="waste" className="mt-4"><WasteReport filters={filters} /></TabsContent>
@@ -71,6 +72,7 @@ function ReportsPage() {
         <TabsContent value="surgical" className="mt-4"><SurgicalReport filters={filters} /></TabsContent>
         <TabsContent value="time" className="mt-4"><TimeReport filters={filters} /></TabsContent>
         <TabsContent value="ward" className="mt-4"><WardReport filters={filters} /></TabsContent>
+        <TabsContent value="anvisa" className="mt-4"><AnvisaReport filters={filters} /></TabsContent>
       </Tabs>
     </div>
   );
